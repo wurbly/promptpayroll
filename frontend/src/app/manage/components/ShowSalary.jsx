@@ -1,5 +1,3 @@
-'use client';
-
 import { Card, Heading, Text} from '@chakra-ui/react';
 
 export default function ShowSalary() {

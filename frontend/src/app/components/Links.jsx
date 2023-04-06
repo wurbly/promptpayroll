@@ -1,5 +1,3 @@
-'use client';
-
 import { Flex, Box, Spacer } from '@chakra-ui/react';
 import NextLink from 'next/link';
 import { Link } from '@chakra-ui/next-js';

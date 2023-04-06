@@ -1,7 +1,13 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 
-import "@openzeppelin/contracts/access/Ownable.sol";
+/* 
+    Limitations:
+    // Require minimum salary of around 0.0001ETH for fractional calculations to work
+    // since Solidity doesn't support floating point numbers.
+*/
+
+import "../node_modules/@openzeppelin/contracts/access/Ownable.sol";
 
 contract PromptPayroll is Ownable {
     string public companyName;
@@ -18,9 +24,9 @@ contract PromptPayroll is Ownable {
     uint public monthStart;
     uint public monthDuration;
 
-    constructor(string memory _companyName, address _owner) {
+    constructor(string memory _companyName, address newOwner) {
         companyName = _companyName;
-        transferOwnership(_owner);
+        transferOwnership(newOwner);
     }
 
     function changeCompanyName(
@@ -44,6 +50,11 @@ contract PromptPayroll is Ownable {
         employeeAddresses.push(_employeeAddress);
     }
 
+    // Remove employee (Before any salary is paid)
+    function deactivateEmployee(uint employeeId) external onlyOwner {
+        employees[employeeAddresses[employeeId]].isActive = false;
+    }
+
     // Check id
     function getEmployeeId(
         address _employeeAddress
@@ -56,32 +67,13 @@ contract PromptPayroll is Ownable {
         employees[employeeAddresses[employeeId]].salary = newSalary;
     }
 
-    // Remove employee, pay salaries due, collect balance
-    function terminateEmployee(uint employeeId) external onlyOwner {
-        require(
-            employees[employeeAddresses[employeeId]].isActive,
-            "Employee is not active."
-        );
-        // Flip from active to inactive.
-        employees[employeeAddresses[employeeId]].isActive = false;
-
-        // Get employee / employer balance and pay.
-        uint dueBalance = ((block.timestamp -
-            employees[employeeAddresses[employeeId]].lastWithdrawal) /
-            monthDuration) * employees[employeeAddresses[employeeId]].salary;
-
-        uint unspentBalance = employees[employeeAddresses[employeeId]].salary -
-            dueBalance;
-
-        (bool dueSuccess, ) = employeeAddresses[employeeId].call{
-            value: dueBalance
-        }("");
-        require(dueSuccess, "Payment to employee failed");
-
-        (bool unspentSuccess, ) = payable(msg.sender).call{
-            value: unspentBalance
-        }("");
-        require(unspentSuccess, "Withdrawal of unspent salary failed");
+    function totalSalaries() public view returns (uint _totalSalaries) {
+        _totalSalaries = 0;
+        for (uint i = 0; i < employeeAddresses.length; i++) {
+            if (employees[employeeAddresses[i]].isActive) {
+                _totalSalaries += employees[employeeAddresses[i]].salary;
+            }
+        }
     }
 
     // Deposit salaries for all employees
@@ -121,6 +113,39 @@ contract PromptPayroll is Ownable {
         monthDuration = (daysInMonth) * 1 days;
     }
 
+    // Remove employee, pay salaries due, collect balance
+    function terminateEmployee(uint employeeId) external onlyOwner {
+        require(
+            employees[employeeAddresses[employeeId]].isActive,
+            "Employee is not active."
+        );
+        // Flip from active to inactive.
+        employees[employeeAddresses[employeeId]].isActive = false;
+
+        // Get employee / employer balance and pay.
+        // Note: Salary is multiplied first because (elapsedTime/monthDuration) will result in rounding to 0.
+        // This requires a minimum salary of around 0.0001 ETH.
+        uint dueBalance = ((block.timestamp -
+            employees[employeeAddresses[employeeId]].lastWithdrawal) *
+            employees[employeeAddresses[employeeId]].salary) / monthDuration;
+
+        employees[employeeAddresses[employeeId]].lastWithdrawal = block
+            .timestamp;
+
+        uint unspentBalance = employees[employeeAddresses[employeeId]].salary -
+            dueBalance;
+
+        (bool dueSuccess, ) = employeeAddresses[employeeId].call{
+            value: dueBalance
+        }("");
+        require(dueSuccess, "Payment to employee failed");
+
+        (bool unspentSuccess, ) = payable(msg.sender).call{
+            value: unspentBalance
+        }("");
+        require(unspentSuccess, "Withdrawal of unspent salary failed");
+    }
+
     function viewBalanceByAddress(
         address _employee
     ) public view returns (uint _balance) {
@@ -137,8 +162,9 @@ contract PromptPayroll is Ownable {
     // Only can withdraw amount based on timestamp. No specification of amount.
     function withdrawSalary() public onlyEmployee {
         uint withdrawable = ((block.timestamp -
-            employees[msg.sender].lastWithdrawal) / monthDuration) *
-            employees[msg.sender].salary;
+            employees[msg.sender].lastWithdrawal) *
+            employees[msg.sender].salary) / monthDuration;
+        require(withdrawable > 0, "No salary available to withdraw!");
 
         employees[msg.sender].lastWithdrawal = block.timestamp;
         employees[msg.sender].balance -= withdrawable;
@@ -163,9 +189,9 @@ contract PromptPayroll is Ownable {
         // Pay all employee payments due
         for (uint i = 0; i < employeeAddresses.length; i++) {
             if (employees[employeeAddresses[i]].isActive) {
-                uint dueBalance = ((block.timestamp -
-                    employees[employeeAddresses[i]].lastWithdrawal) /
-                    monthDuration) * employees[employeeAddresses[i]].salary;
+                uint dueBalance = (block.timestamp -
+                    employees[employeeAddresses[i]].lastWithdrawal) *
+                    employees[employeeAddresses[i]].salary / monthDuration;
 
                 (bool success, ) = employeeAddresses[i].call{value: dueBalance}(
                     ""
@@ -179,16 +205,7 @@ contract PromptPayroll is Ownable {
         }("");
         require(withdrawSuccess, "Withdrawal of unspent balances failed");
 
-        companyName = "This company has been closed";
-    }
-
-    function totalSalaries() public view returns (uint _totalSalaries) {
-        _totalSalaries = 0;
-        for (uint i = 0; i < employeeAddresses.length; i++) {
-            if (employees[employeeAddresses[i]].isActive) {
-                _totalSalaries += employees[employeeAddresses[i]].salary;
-            }
-        }
+        companyName = "This company has been closed.";
     }
 
     function isEmployee(

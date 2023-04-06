@@ -1,5 +1,3 @@
-'use client';
-
 import { Flex, Spacer } from '@chakra-ui/react';
 
 export default function Brand() {

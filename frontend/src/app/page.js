@@ -1,15 +1,18 @@
 'use client';
 
-import { Flex, Box, Heading } from '@chakra-ui/react';
+import { Flex, Box, Heading, Text } from '@chakra-ui/react';
 import CreateNew from './components/CreateNew';
 import ShowContracts from './components/ShowContracts';
 
 export default function Home() {
+  
   return (
-    <Flex direction='column' align='center'>
-      <Box>
-        Setting up a Payroll contract for your company is easy. Just enter your company name into the field below, and hit submit.
-        A contract will be automatically deployed for you to manage your employee payrolls.
+    <Flex direction="column" align="center">
+      <Box maxWidth="50%">
+        <Heading align="center" mb={5}>PromptPayroll</Heading>
+        <Text>Welcome to PromptPayroll.</Text>
+        <Text>We simplify payroll transactions by allowing employees to claim their accrued salaries on demand in the middle of the month. No more payday loans or employer advances!</Text>
+        <Text>To start, simply deploy a new payroll contract for your company below.</Text>
       </Box>
       <Heading>Set up a new payroll contract</Heading>
       <CreateNew />
@@ -19,5 +22,5 @@ export default function Home() {
       </Box>
       <ShowContracts />
     </Flex>
-  )
+  );
 }
