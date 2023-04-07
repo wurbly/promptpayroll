@@ -8,8 +8,9 @@ pragma solidity ^0.8.19;
 */
 
 import "../node_modules/@openzeppelin/contracts/access/Ownable.sol";
+import "./PromptPayrollEvents.sol";
 
-contract PromptPayroll is Ownable {
+contract PromptPayroll is Ownable, PromptPayrollEvents {
     string public companyName;
 
     struct Employee {
@@ -27,12 +28,15 @@ contract PromptPayroll is Ownable {
     constructor(string memory _companyName, address newOwner) {
         companyName = _companyName;
         transferOwnership(newOwner);
+        emit CompanyOpened(companyName, newOwner);
     }
 
     function changeCompanyName(
         string calldata newCompanyName
     ) external onlyOwner {
+        string memory previousName = companyName;
         companyName = newCompanyName;
+        emit CompanyNameChanged(previousName, companyName);
     }
 
     // Add new employee record
@@ -48,11 +52,17 @@ contract PromptPayroll is Ownable {
             0
         );
         employeeAddresses.push(_employeeAddress);
+        emit EmployeeAdded(
+            employeeAddresses.length - 1,
+            _employeeAddress,
+            _salary
+        );
     }
 
     // Remove employee (Before any salary is paid)
     function deactivateEmployee(uint employeeId) external onlyOwner {
         employees[employeeAddresses[employeeId]].isActive = false;
+        emit EmployeeDeactivated(employeeId, employeeAddresses[employeeId]);
     }
 
     // Check id
@@ -64,7 +74,9 @@ contract PromptPayroll is Ownable {
 
     // Change employee salary
     function updateSalary(uint employeeId, uint newSalary) external onlyOwner {
+        uint previousSalary = employees[employeeAddresses[employeeId]].salary;
         employees[employeeAddresses[employeeId]].salary = newSalary;
+        emit SalaryUpdated(employeeId, previousSalary, newSalary);
     }
 
     function totalSalaries() public view returns (uint _totalSalaries) {
@@ -108,9 +120,11 @@ contract PromptPayroll is Ownable {
             }
         }
 
-        // Set month start and no. of working days
+        // Set month start and no. of days
         monthStart = block.timestamp;
         monthDuration = (daysInMonth) * 1 days;
+
+        emit SalariesDeposited(msg.value, daysInMonth, block.timestamp);
     }
 
     // Remove employee, pay salaries due, collect balance
@@ -144,6 +158,8 @@ contract PromptPayroll is Ownable {
             value: unspentBalance
         }("");
         require(unspentSuccess, "Withdrawal of unspent salary failed");
+
+        emit EmployeeTerminated(employeeId, dueBalance, unspentBalance);
     }
 
     function viewBalanceByAddress(
@@ -170,6 +186,12 @@ contract PromptPayroll is Ownable {
         employees[msg.sender].balance -= withdrawable;
         (bool success, ) = msg.sender.call{value: withdrawable}("");
         require(success, "Withdrawal unsuccessful");
+
+        emit SalaryWithdrawal(
+            employees[msg.sender].id,
+            withdrawable,
+            block.timestamp
+        );
     }
 
     // Employee change address:
@@ -183,15 +205,17 @@ contract PromptPayroll is Ownable {
         employees[msg.sender].isActive = false;
         employees[msg.sender].balance = 0;
         employees[msg.sender].lastWithdrawal = 0;
+
+        emit EmployeeAddressChanged(employeeId, msg.sender, newAddress);
     }
 
     function closeCompany() external onlyOwner {
         // Pay all employee payments due
         for (uint i = 0; i < employeeAddresses.length; i++) {
             if (employees[employeeAddresses[i]].isActive) {
-                uint dueBalance = (block.timestamp -
+                uint dueBalance = ((block.timestamp -
                     employees[employeeAddresses[i]].lastWithdrawal) *
-                    employees[employeeAddresses[i]].salary / monthDuration;
+                    employees[employeeAddresses[i]].salary) / monthDuration;
 
                 (bool success, ) = employeeAddresses[i].call{value: dueBalance}(
                     ""
@@ -205,7 +229,10 @@ contract PromptPayroll is Ownable {
         }("");
         require(withdrawSuccess, "Withdrawal of unspent balances failed");
 
+        string memory previousCompanyName = companyName;
         companyName = "This company has been closed.";
+
+        emit CompanyClosed(previousCompanyName, block.timestamp);
     }
 
     function isEmployee(
@@ -223,6 +250,4 @@ contract PromptPayroll is Ownable {
         require(isEmployee(msg.sender), "You are not an active employee!");
         _;
     }
-
-    // Fallback / Receive?
 }
