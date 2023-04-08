@@ -1,26 +1,31 @@
 'use client';
 
-import { Flex, Box, Heading, Text } from '@chakra-ui/react';
+import { Flex, Box, Heading, Text, Link } from '@chakra-ui/react';
+import NextLink from 'next/link';
 import CreateNew from './components/CreateNew';
-import ShowContracts from './components/ShowContracts';
 
 export default function Home() {
   
   return (
     <Flex direction="column" align="center">
-      <Box maxWidth="50%">
+      <Box width="50%" mb={5}>
         <Heading align="center" mb={5}>PromptPayroll</Heading>
-        <Text>Welcome to PromptPayroll.</Text>
-        <Text>We simplify payroll transactions by allowing employees to claim their accrued salaries on demand in the middle of the month. No more payday loans or employer advances!</Text>
-        <Text>To start, simply deploy a new payroll contract for your company below.</Text>
+        <Text mb={3}>Welcome to PromptPayroll.</Text>
+        <Text mb={3}>A blockchain-enabled solution for your employees to get paid anytime they wish. No more payday loans with PromptPayroll!</Text>
+        <Text mb={3}>To begin, create a contract for your Company by entering your Company name below and click the "create contract" button!</Text>
+        <hr />
       </Box>
-      <Heading>Set up a new payroll contract</Heading>
       <CreateNew />
-      <Heading>Find your company</Heading>
-      <Box>
-        Already have a company? Find your company below!
+      <Box width="50%">
+        <Heading align="center">Find your company ↗️</Heading>
+        <Box align="center" mb={3}>
+          <Text>Already deployed a company contract or work for a company using PromptPayroll?</Text>
+          <Text>Find your company from the "directory" tab to manage your company or claim your salary</Text>
+          <Text align="center">
+            or click <Link as={NextLink} href="/directory">✨here✨</Link>.
+          </Text>
+        </Box>
       </Box>
-      <ShowContracts />
     </Flex>
   );
 }

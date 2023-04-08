@@ -6,8 +6,8 @@ import "./PromptPayroll.sol";
 contract PromptPayrollFactory {
     address[] public deployedContracts;
 
-    function createNewContract(string calldata _companyName) external {
-        PromptPayroll promptPayroll = new PromptPayroll(_companyName, msg.sender);
+    function createNewContract(string calldata newCompanyName) external {
+        PromptPayroll promptPayroll = new PromptPayroll(newCompanyName, msg.sender);
         deployedContracts.push(address(promptPayroll));
     }
 

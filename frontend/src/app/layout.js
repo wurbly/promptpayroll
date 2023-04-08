@@ -10,7 +10,7 @@ import {
   RainbowKitProvider,
 } from '@rainbow-me/rainbowkit';
 import { configureChains, createClient, WagmiConfig } from 'wagmi';
-import { mainnet, goerli, sepolia, polygon, optimism, arbitrum } from 'wagmi/chains';
+import { mainnet, goerli, sepolia } from 'wagmi/chains';
 import { alchemyProvider } from 'wagmi/providers/alchemy';
 import { publicProvider } from 'wagmi/providers/public';
 import Header from './components/Header';
@@ -23,7 +23,7 @@ export const metadata = {
 
 export default function RootLayout({ children }) {
   const { chains, provider } = configureChains(
-    [mainnet, goerli, sepolia, polygon, optimism, arbitrum],
+    [mainnet, goerli, sepolia],
     [
       alchemyProvider({ apiKey: process.env.ALCHEMY_ID }),
       publicProvider()

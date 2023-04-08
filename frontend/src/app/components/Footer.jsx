@@ -5,14 +5,17 @@ export default function Header() {
 
   return (
     <Flex 
-    direction="column"
-    align="center"
-    justify="center" 
-    bgColor="#3282B8">
-      <Box>
-      <Text>😶 made with love 😶</Text>
+      direction="column"
+      align="center"
+      justify="center" 
+      bgColor="#3282B8"
+      p={3}
+      mt={10}
+    >
+      <Box py={3}>
+        <Text>😶 made with love by a clueless dev 😶</Text>
       </Box>
-      <Box>
+      <Box py={3}>
         <Links /> 
       </Box>
     </Flex>

@@ -1,4 +1,4 @@
-import { Flex, Spacer } from '@chakra-ui/react';
+import { Flex } from '@chakra-ui/react';
 
 export default function Brand() {
   return (

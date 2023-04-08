@@ -2,12 +2,13 @@
 pragma solidity ^0.8.19;
 
 /* 
+    Author: wurbs
     Limitations:
-    // Require minimum salary of around 0.0001ETH for fractional calculations to work
+    // Requires minimum salary of around 0.0001ETH for fractional calculations to work
     // since Solidity doesn't support floating point numbers.
 */
 
-import "../node_modules/@openzeppelin/contracts/access/Ownable.sol";
+import "./Ownable.sol";
 import "./PromptPayrollEvents.sol";
 
 contract PromptPayroll is Ownable, PromptPayrollEvents {
@@ -20,6 +21,7 @@ contract PromptPayroll is Ownable, PromptPayrollEvents {
         uint balance;
         uint lastWithdrawal; // time of last withdrawal, or start of month if no withdrawals were made.
     }
+    
     mapping(address => Employee) public employees;
     address payable[] public employeeAddresses;
     uint public monthStart;
@@ -41,21 +43,21 @@ contract PromptPayroll is Ownable, PromptPayrollEvents {
 
     // Add new employee record
     function addEmployee(
-        address payable _employeeAddress,
-        uint _salary
+        address payable employeeAddress,
+        uint salary
     ) external onlyOwner {
-        employees[_employeeAddress] = Employee(
+        employees[employeeAddress] = Employee(
             employeeAddresses.length,
             true,
-            _salary,
+            salary,
             0,
             0
         );
-        employeeAddresses.push(_employeeAddress);
+        employeeAddresses.push(employeeAddress);
         emit EmployeeAdded(
             employeeAddresses.length - 1,
-            _employeeAddress,
-            _salary
+            employeeAddress,
+            salary
         );
     }
 
@@ -67,9 +69,9 @@ contract PromptPayroll is Ownable, PromptPayrollEvents {
 
     // Check id
     function getEmployeeId(
-        address _employeeAddress
+        address employeeAddress
     ) public view returns (uint _id) {
-        return employees[_employeeAddress].id;
+        return employees[employeeAddress].id;
     }
 
     // Change employee salary
@@ -79,11 +81,11 @@ contract PromptPayroll is Ownable, PromptPayrollEvents {
         emit SalaryUpdated(employeeId, previousSalary, newSalary);
     }
 
-    function totalSalaries() public view returns (uint _totalSalaries) {
-        _totalSalaries = 0;
+    function totalSalaries() public view returns (uint total) {
+        total = 0;
         for (uint i = 0; i < employeeAddresses.length; i++) {
             if (employees[employeeAddresses[i]].isActive) {
-                _totalSalaries += employees[employeeAddresses[i]].salary;
+                total += employees[employeeAddresses[i]].salary;
             }
         }
     }
@@ -163,15 +165,15 @@ contract PromptPayroll is Ownable, PromptPayrollEvents {
     }
 
     function viewBalanceByAddress(
-        address _employee
-    ) public view returns (uint _balance) {
-        return employees[_employee].balance;
+        address employeeAddress
+    ) public view returns (uint balance) {
+        return employees[employeeAddress].balance;
     }
 
     function viewBalanceById(
-        uint _employeeId
-    ) public view returns (uint _balance) {
-        return employees[employeeAddresses[_employeeId]].balance;
+        uint employeeId
+    ) public view returns (uint balance) {
+        return employees[employeeAddresses[employeeId]].balance;
     }
 
     // Employee withdrawal:
@@ -236,12 +238,12 @@ contract PromptPayroll is Ownable, PromptPayrollEvents {
     }
 
     function isEmployee(
-        address _employee
-    ) public view returns (bool _isEmployee) {
+        address employeeAddress
+    ) public view returns (bool employee) {
         for (uint i = 0; i < employeeAddresses.length; i++) {
             if (
-                _employee == employeeAddresses[i] &&
-                employees[_employee].isActive
+                employeeAddress == employeeAddresses[i] &&
+                employees[employeeAddress].isActive
             ) return true;
         }
     }

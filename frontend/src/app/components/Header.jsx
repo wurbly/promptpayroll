@@ -11,6 +11,8 @@ export default function Header() {
       align="center"
       justify="center"
       bgColor="#0F4C75"
+      p={3}
+      mb={10}
     >
       <Flex 
         width="100%"
