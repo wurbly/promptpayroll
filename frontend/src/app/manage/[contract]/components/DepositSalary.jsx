@@ -2,11 +2,11 @@ import { useState, useEffect } from "react";
 import {
   Flex,
   Box,
-  Heading,
   Text
 } from "@chakra-ui/react";
 import { ethers } from "ethers";
 import { useContractRead } from "wagmi";
+import FormHeading from './FormHeading';
 import DepositForm from './DepositForm';
 
 export default function ShowSalary({ contractAddress, abi }) {
@@ -26,10 +26,8 @@ export default function ShowSalary({ contractAddress, abi }) {
   }, [data]);
 
   return (
-    <Flex direction="column" width="48%" bgColor="#0F4C75" p={3}>
-      <Heading align="center" fontSize="2xl" my={3}>
-        Deposit Salaries
-      </Heading>
+    <Flex direction="column" width="100%" bgColor="#0F4C75" p={3}>
+      <FormHeading text="Deposit Salaries" />
       <Box>
         <Text>Total Salaries: {salaries} ETH</Text>
       </Box>

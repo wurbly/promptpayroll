@@ -13,7 +13,7 @@ export default function Header() {
       mt={10}
     >
       <Box py={3}>
-        <Text>😶 made with love by a clueless dev 😶</Text>
+        <Text>😶 wurbs was here 😶</Text>
       </Box>
       <Box py={3}>
         <Links /> 

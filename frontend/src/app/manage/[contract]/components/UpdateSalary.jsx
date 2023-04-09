@@ -17,9 +17,9 @@ import { ethers } from "ethers";
 import { useContractWrite, usePrepareContractWrite } from "wagmi";
 import FormHeading from "./FormHeading";
 
-export default function AddEmployee({ contractAddress, abi }) {
-  const [employeeAddress, setEmployeeAddress] = useState("");
-  const [employeeSalary, setEmployeeSalary] = useState(0);
+export default function UpdateSalary({ contractAddress, abi }) {
+  const [employeeId, setEmployeeId] = useState("");
+  const [newSalary, setNewSalary] = useState(0);
   const [salaryInWei, setSalaryInWei] = useState("");
   const [txHash, setTxHash] = useState("");
   const [statusMessage, setStatusMessage] = useState("");
@@ -27,8 +27,8 @@ export default function AddEmployee({ contractAddress, abi }) {
   const { config } = usePrepareContractWrite({
     address: contractAddress,
     abi: abi,
-    functionName: "addEmployee",
-    args: [employeeAddress, salaryInWei],
+    functionName: "updateSalary",
+    args: [employeeId, salaryInWei],
   });
 
   const {
@@ -61,17 +61,17 @@ export default function AddEmployee({ contractAddress, abi }) {
   }, [data]);
 
   useEffect(() => {
-    if (employeeSalary) {
-      setSalaryInWei(ethers.utils.parseEther(employeeSalary));
+    if (newSalary) {
+      setSalaryInWei(ethers.utils.parseEther(newSalary));
     }
-  }, [employeeSalary]);
+  }, [newSalary]);
 
-  const handleChangeAddress = (evt) => {
-    setEmployeeAddress(evt.target.value);
+  const handleChangeEmployeeId = (evt) => {
+    setEmployeeId(evt.target.value);
   };
 
   const handleChangeSalary = (evt) => {
-    setEmployeeSalary(evt.target.value);
+    setNewSalary(evt.target.value);
   };
 
   const handleSubmit = (evt) => {
@@ -84,19 +84,17 @@ export default function AddEmployee({ contractAddress, abi }) {
 
   return (
     <Flex direction="column" width="100%" bgColor="#0F4C75" p={3}>
-      <FormHeading text="Add Employee" />
+      <FormHeading text="Update Salary" />
       <form onSubmit={handleSubmit}>
         <FormControl isRequired>
-          <FormLabel>Employee account address:</FormLabel>
+          <FormLabel>Employee ID: </FormLabel>
           <Input
-            type="text"
-            value={employeeAddress}
-            onChange={handleChangeAddress}
+            type="number"
+            value={employeeId}
+            onChange={handleChangeEmployeeId}
           />
           <FormHelperText color="#BBE1FA" mb={3}>
-            Please ensure that you input the correct address. Incorrectly
-            entered addresses will result in the address entered having full
-            control of your employee's funds which we will be unable to recover.
+            Please ensure you enter the correct ID. To check, use the `Get Employee Id from Address` form to confirm an employee's id!
           </FormHelperText>
         </FormControl>
         <FormControl isRequired>
@@ -104,18 +102,19 @@ export default function AddEmployee({ contractAddress, abi }) {
           <InputGroup>
             <Input
               type="number"
-              value={employeeSalary}
+              value={newSalary}
               onChange={handleChangeSalary}
             />
             <InputRightAddon children="ETH" color="#1B262C" />
           </InputGroup>
           <FormHelperText color="#BBE1FA" mb={3}>
-            Please enter the correct salary in ETH. Changing the salary later
-            will require a separate transaction, which will incur gas.
+            Please enter the updated salary.
+            If salary is increased, you will be required to top up the difference in salary for the current period.
+            If salary is decreased, you will be refunded the difference in salary for the current period. 
           </FormHelperText>
         </FormControl>
         <Button type="submit" colorScheme="green" mb={3} width="100%" p="auto">
-          {isLoading ? <Spinner /> : "Add Employee"}
+          {isLoading ? <Spinner /> : "Update Salary"}
         </Button>
       </form>
       <Box width="100%" bgColor="#0F4C75" p={3} mb={3}>

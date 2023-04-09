@@ -4,26 +4,20 @@ import {
   Box,
   Text,
   Link,
-  FormControl,
-  FormLabel,
-  Input,
-  FormHelperText,
   Button,
   Spinner
 } from "@chakra-ui/react";
 import { useContractWrite, usePrepareContractWrite } from "wagmi";
 import FormHeading from './FormHeading';
 
-export default function NameChange({ contractAddress, abi }) {
-  const [companyName, setCompanyName] = useState("");
+export default function CloseCompany({ contractAddress, abi }){
   const [txHash, setTxHash] = useState("");
   const [statusMessage, setStatusMessage] = useState("");
 
   const { config } = usePrepareContractWrite({
     address: contractAddress,
     abi: abi,
-    functionName: "changeCompanyName",
-    args: [companyName]
+    functionName: "closeCompany"
   });
 
   const {
@@ -55,31 +49,21 @@ export default function NameChange({ contractAddress, abi }) {
     }
   }, [data]);
 
-  const handleChange = (evt) => {
-    setCompanyName(evt.target.value);
-  };
-
-  const handleSubmit = (evt) => {
-    evt.preventDefault();
+  const handleClick = (evt) => {
     write();
-    setCompanyName("");
   };
 
   return (
     <Flex direction="column" width="100%" bgColor="#0F4C75" p={3}>
-      <FormHeading text="Change Company Name" />
-      <form onSubmit={handleSubmit}>
-        <FormControl isRequired>
-          <FormLabel>New Company Name</FormLabel>
-          <Input type="text" value={companyName} onChange={handleChange} />
-          <FormHelperText color="#BBE1FA" mb={3}>
-            This transaction will cost gas.
-          </FormHelperText>
-        </FormControl>
-        <Button type="submit" colorScheme="red" mb={3} width='100%' p="auto">
-          {isLoading ? <Spinner /> : "Change Name"}
+      <FormHeading text="Close Company" />
+      <Box mb={3}>
+        <Text mb={3}>This function will close the company.</Text>
+        <Text mb={3}>Any accrued salaries till this point will be automatically paid to all employees and any excess salaries deposited will be refunded to your account.</Text>
+        <Text>This action is irreversible. CHECK BEFORE YOU PROCEED. </Text>
+      </Box>
+        <Button colorScheme="red" mb={3} width='100%' onClick={handleClick}>
+          {isLoading ? <Spinner /> : "Close Company"}
         </Button>
-      </form>
       <Box width="100%" bgColor="#0F4C75" p={3} mb={3}>
           <Text>{statusMessage}</Text>
           {txHash && (

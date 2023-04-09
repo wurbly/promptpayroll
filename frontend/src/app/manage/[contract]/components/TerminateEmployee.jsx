@@ -14,16 +14,16 @@ import {
 import { useContractWrite, usePrepareContractWrite } from "wagmi";
 import FormHeading from './FormHeading';
 
-export default function NameChange({ contractAddress, abi }) {
-  const [companyName, setCompanyName] = useState("");
+export default function TerminateEmployee({ contractAddress, abi }){
+  const [employeeId, setEmployeeId] = useState(0);
   const [txHash, setTxHash] = useState("");
   const [statusMessage, setStatusMessage] = useState("");
 
   const { config } = usePrepareContractWrite({
     address: contractAddress,
     abi: abi,
-    functionName: "changeCompanyName",
-    args: [companyName]
+    functionName: "terminateEmployee",
+    args: [employeeId]
   });
 
   const {
@@ -56,28 +56,31 @@ export default function NameChange({ contractAddress, abi }) {
   }, [data]);
 
   const handleChange = (evt) => {
-    setCompanyName(evt.target.value);
-  };
+    setEmployeeId(evt.target.value);
+  }
 
   const handleSubmit = (evt) => {
     evt.preventDefault();
     write();
-    setCompanyName("");
+    setEmployeeId("");
   };
 
   return (
     <Flex direction="column" width="100%" bgColor="#0F4C75" p={3}>
-      <FormHeading text="Change Company Name" />
+      <FormHeading text="Terminate Employee" />
+      <Box mb={3}>
+        <Text mb={3}>This terminates the employee with the `EmployeeId`.</Text>
+        <Text mb={3}>Any accrued salaries this month will be automatically paid to the employee and any excess salaries deposited will be refunded to your account.</Text>
+        <Text>If you've made an incorrect entry and haven't deposited any salaries, please use the "Deactivate Employee" option instead.</Text>
+      </Box>
       <form onSubmit={handleSubmit}>
         <FormControl isRequired>
-          <FormLabel>New Company Name</FormLabel>
-          <Input type="text" value={companyName} onChange={handleChange} />
-          <FormHelperText color="#BBE1FA" mb={3}>
-            This transaction will cost gas.
-          </FormHelperText>
+          <FormLabel>Employee ID:</FormLabel>
+          <Input type='number' value={employeeId} onChange={handleChange}></Input>
+          <FormHelperText color="#BBE1FA" mb={3}>This cannot be reversed. The employee will be paid the outstanding salary as of now and the balance will be refunded to your account.</FormHelperText>
         </FormControl>
         <Button type="submit" colorScheme="red" mb={3} width='100%' p="auto">
-          {isLoading ? <Spinner /> : "Change Name"}
+          {isLoading ? <Spinner /> : "Remove Employee"}
         </Button>
       </form>
       <Box width="100%" bgColor="#0F4C75" p={3} mb={3}>

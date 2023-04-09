@@ -1,8 +1,6 @@
 import { useState, useEffect } from "react";
 import {
-  Flex,
   Box,
-  Heading,
   Text,
   Link,
   FormControl,
@@ -19,7 +17,7 @@ export default function DepositForm({ contractAddress, abi, salaries }) {
   const [txHash, setTxHash] = useState("");
   const [statusMessage, setStatusMessage] = useState("");
   const [monthDays, setMonthDays] = useState("");
-  const [salaryPayable, setSalaryPayable] = useState("1512451161613613");
+  const [salaryPayable, setSalaryPayable] = useState("");
 
   const { config } = usePrepareContractWrite({
     address: contractAddress,

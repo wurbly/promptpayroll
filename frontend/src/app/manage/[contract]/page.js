@@ -1,12 +1,16 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { Flex, Box, Heading, Text } from '@chakra-ui/react';
+import { useState, useEffect } from "react";
+import { Flex, Box, Heading, Text, Tabs, TabList, Tab, TabPanels, TabPanel } from "@chakra-ui/react";
 import { useAccount, useContractRead } from "wagmi";
-import NameChange from './components/NameChange';
-import DepositSalary from './components/DepositSalary';
-import AddEmployee from './components/AddEmployee';
-import RemoveEmployee from './components/RemoveEmployee';
+import NameChange from "./components/NameChange";
+import DepositSalary from "./components/DepositSalary";
+import AddEmployee from "./components/AddEmployee";
+import TerminateEmployee from "./components/TerminateEmployee";
+import GetEmployeeId from "./components/GetEmployeeId";
+import DeactivateEmployee from "./components/DeactivateEmployee";
+import UpdateSalary from "./components/UpdateSalary";
+import CloseCompany from "./components/CloseCompany";
 
 export default function Employer({ params }) {
   const abi = [
@@ -606,10 +610,10 @@ export default function Employer({ params }) {
       type: "function",
     },
   ];
-  const [walletConnectStatus, setWalletConnectStatus] = useState("");
-  const [contractAddress, setContractAddress] = useState(params.contract);
-  const [companyName, setCompanyName] = useState('');
 
+  const contractAddress = params.contract;
+  const [walletConnectStatus, setWalletConnectStatus] = useState("");
+  const [companyName, setCompanyName] = useState("");
   const { address, isConnecting, isConnected, isDisconnected, status } =
     useAccount();
 
@@ -633,33 +637,77 @@ export default function Employer({ params }) {
   }, [status]);
 
   useEffect(() => {
-    if(companyNameData) {
+    if (companyNameData) {
       setCompanyName(companyNameData);
     }
   }, [companyNameData]);
 
   return (
-    <Flex direction='column' align='center'>
+    <Flex direction="column" align="center">
       <Box mb={3}>
-        <Heading align="center" mb={3}>{companyName}</Heading>
-        <Text align="center" mb={3}>Contract address: {contractAddress}</Text>
-        <Text align="center">Please ensure that you are on the correct company page.</Text>
-        <Text align="center" mb={3}>If not, please head back to the directory to select the correct Company.</Text>
-        <Text align="center">The transactions on this page can only be performed by the owner of the Company.</Text>
-        <Text align="center" mb={3}>Transactions submitted by non-owners will fail and gas will be lost.</Text>
+        <Heading align="center" mb={3}>
+          You are managing: {companyName}
+        </Heading>
+        <Text align="center" mb={3}>
+          Contract address: {contractAddress}
+        </Text>
+        <Text align="center">
+          Please ensure that you are on the correct company page.
+        </Text>
+        <Text align="center" mb={3}>
+          If not, please head back to the directory to select the correct
+          Company.
+        </Text>
+        <Text align="center">
+          The transactions on this page can only be performed by the owner of
+          the Company.
+        </Text>
+        <Text align="center" mb={3}>
+          Transactions submitted by non-owners will fail and gas will be lost.
+        </Text>
       </Box>
       <Box width="80%" bgColor="#0F4C75" align="center" p={3} mb={3}>
         <Text textAlign={"center"}>{walletConnectStatus}</Text>
       </Box>
-      <Flex direction='row' align='center' justify='space-between' width="80%">
-        <NameChange contractAddress={contractAddress} abi={abi} />
-        <DepositSalary contractAddress={contractAddress} abi={abi} />
-      </Flex>
-      <Flex direction='row' align='center' justify='space-evenly' w='100%'>
-        <AddEmployee />
-        <RemoveEmployee />
-      </Flex>
+      <Tabs width='80%' align="center" variant="enclosed">
+        <TabList>
+          <Tab>Deposit Salaries</Tab>
+          <Tab>Change Company Name</Tab>
+          <Tab>Add Employee</Tab>
+          <Tab>Get Employee Id</Tab>
+          <Tab>Deactivate Employee</Tab>
+          <Tab>Update Employee Salary</Tab>
+          <Tab>Terminate Employee</Tab>  
+          <Tab>Close Company</Tab>
+        </TabList>
+          
+        <TabPanels>
+          <TabPanel px={0}>
+            <DepositSalary contractAddress={contractAddress} abi={abi} />
+          </TabPanel>
+          <TabPanel px={0}>
+            <NameChange contractAddress={contractAddress} abi={abi} />
+          </TabPanel>
+          <TabPanel px={0}>
+            <AddEmployee contractAddress={contractAddress} abi={abi} />
+          </TabPanel>
+          <TabPanel px={0}>
+            <GetEmployeeId contractAddress={contractAddress} abi={abi} />
+          </TabPanel>
+          <TabPanel px={0}>
+            <DeactivateEmployee contractAddress={contractAddress} abi={abi} />
+          </TabPanel>
+          <TabPanel px={0}>
+            <UpdateSalary contractAddress={contractAddress} abi={abi} />
+          </TabPanel>
+          <TabPanel px={0}>
+            <TerminateEmployee contractAddress={contractAddress} abi={abi} />
+          </TabPanel>
+          <TabPanel px={0}>
+            <CloseCompany contractAddress={contractAddress} abi={abi} />
+          </TabPanel>
+        </TabPanels>
+      </Tabs>
     </Flex>
   );
-
 }

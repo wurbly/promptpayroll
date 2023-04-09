@@ -74,7 +74,7 @@ contract PromptPayroll is Ownable, PromptPayrollEvents {
         return employees[employeeAddress].id;
     }
 
-    // Change employee salary
+    // Change employee salary and top up difference for the current month.
     function updateSalary(uint employeeId, uint newSalary) external onlyOwner {
         uint previousSalary = employees[employeeAddresses[employeeId]].salary;
         employees[employeeAddresses[employeeId]].salary = newSalary;

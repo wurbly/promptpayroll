@@ -2,17 +2,14 @@ import { useState, useEffect } from "react";
 import { Flex, Box, Heading, Text, Button, Spinner } from "@chakra-ui/react";
 import { useContractWrite, usePrepareContractWrite } from "wagmi";
 
-export default function Withdraw({ contractAddress, abi, setConnectionError }) {
+export default function Withdraw({ contractAddress, abi }) {
   const [txHash, setTxHash] = useState("");
   const [statusMessage, setStatusMessage] = useState("");
 
   const { config } = usePrepareContractWrite({
     address: contractAddress,
     abi: abi,
-    functionName: "withdrawSalary",
-    onError(error) {
-      setConnectionError(`Error: ${error.message}`);
-    },
+    functionName: "withdrawSalary"
   });
 
   const {
@@ -49,7 +46,7 @@ export default function Withdraw({ contractAddress, abi, setConnectionError }) {
   };
 
   return (
-    <Flex direction="column" width="45%" bgColor="#0F4C75" p={3}>
+    <Flex direction="column" width="100%" bgColor="#0F4C75" p={3}>
       <Heading align="center" fontSize="2xl" my={3}>
         Withdraw
       </Heading>

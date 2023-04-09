@@ -695,10 +695,10 @@ export default function ContractCard({ address }) {
       </CardFooter>
       <Flex width='100%' justify='space-evenly' mb={3}>
         <Link as={NextLink} href={`/manage/${address}`} width='40%'>
-          <Button width="100%" colorScheme="red">Manage</Button>
+          <Button width="100%" colorScheme="red">Employer Dashboard</Button>
         </Link>
         <Link as={NextLink} href={`/withdraw/${address}`} width='40%'>
-          <Button width='100%' colorScheme="green">Withdraw</Button>
+          <Button width='100%' colorScheme="green">Employee Access</Button>
         </Link>
       </Flex>
     </Card>

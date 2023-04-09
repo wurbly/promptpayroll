@@ -1,7 +1,17 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { Flex, Box, Heading, Text } from '@chakra-ui/react';
+import { useState, useEffect } from "react";
+import {
+  Flex,
+  Box,
+  Heading,
+  Text,
+  Tabs,
+  TabList,
+  Tab,
+  TabPanels,
+  TabPanel,
+} from "@chakra-ui/react";
 import Withdraw from "./components/Withdraw";
 import ChangeAddress from "./components/ChangeAddress";
 import { useAccount, useContractRead } from "wagmi";
@@ -606,8 +616,7 @@ export default function Employee({ params }) {
   ];
   const [walletConnectStatus, setWalletConnectStatus] = useState("");
   const [contractAddress, setContract] = useState(params.contract);
-  const [companyName, setCompanyName] = useState('');
-  const [connectionError, setConnectionError] = useState('');
+  const [companyName, setCompanyName] = useState("");
 
   const { data: companyNameData } = useContractRead({
     address: contractAddress,
@@ -632,31 +641,58 @@ export default function Employee({ params }) {
   }, [status]);
 
   useEffect(() => {
-    if(companyNameData) {
+    if (companyNameData) {
       setCompanyName(companyNameData);
     }
   }, [companyNameData]);
 
   return (
     <Flex direction="column" align="center">
-      <Box mb={5}>
-        <Heading align="center" mb={3}>{companyName}</Heading>
-        <Text align="center" mb={3}>Contract address: {contractAddress}</Text>
-        <Text align="center">Please ensure that you are on the correct company page.</Text>
-        <Text align="center" mb={3}>If not, please head back to the directory to select the correct Company.</Text>
-        <Text align="center">The transactions on this page can only be performed by active employees.</Text>
-        <Text align="center" mb={3}>Transactions submitted by non-employees will fail and gas will be lost.</Text>
+      <Box mb={3}>
+        <Heading align="center" mb={3}>
+          You are accessing: {companyName}
+        </Heading>
+        <Text align="center" mb={3}>
+          Contract address: {contractAddress}
+        </Text>
+        <Text align="center">
+          Please ensure that you are on the correct company page.
+        </Text>
+        <Text align="center" mb={3}>
+          If not, please head back to the directory to select the correct
+          Company.
+        </Text>
+        <Text align="center">
+          The transactions on this page can only be performed by active
+          employees.
+        </Text>
+        <Text align="center" mb={3}>
+          Transactions submitted by non-employees will fail and gas will be
+          lost.
+        </Text>
       </Box>
-      <Box width="80%" bgColor="#0F4C75" align="center" p={3}>
+      <Box width="80%" bgColor="#0F4C75" align="center" p={3} mb={3}>
         <Text textAlign={"center"}>{walletConnectStatus}</Text>
       </Box>
-      <Box width="80%" bgColor="red" my={3}>
-        {connectionError && connectionError}
-      </Box>
-      <Flex direction="row" width='100%' justify="space-evenly">
-        <Withdraw contractAddress={contractAddress} abi={abi} setConnectionError={setConnectionError} />
-        <ChangeAddress contractAddress={contractAddress} />
-      </Flex>
+      <Tabs width='80%' align="center" variant="enclosed">
+        <TabList>
+          <Tab>Withdraw</Tab>
+          <Tab>Change Address</Tab>
+          <Tab>View Balance</Tab>
+        </TabList>
+
+        <TabPanels>
+          <TabPanel px={0}>
+            <Withdraw contractAddress={contractAddress} abi={abi} />
+          </TabPanel>
+          <TabPanel px={0}>
+            <ChangeAddress contractAddress={contractAddress} abi={abi} />
+          </TabPanel>
+          <TabPanel px={0}>
+            
+          </TabPanel>
+        </TabPanels>
+      </Tabs>
     </Flex>
   );
 }

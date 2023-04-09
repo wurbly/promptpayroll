@@ -22,7 +22,7 @@ export default function ChangeAddress({ contractAddress, abi }) {
     address: contractAddress,
     abi: abi,
     functionName: "changeAddress",
-    args: [newAddress],
+    args: [newAddress]
   });
 
   const {
@@ -65,7 +65,7 @@ export default function ChangeAddress({ contractAddress, abi }) {
   };
 
   return (
-    <Flex direction="column" width="45%" bgColor="#0F4C75" p={3}>
+    <Flex direction="column" width="100%" bgColor="#0F4C75" p={3}>
       <Heading align="center" fontSize="2xl" my={3}>
         Change address
       </Heading>
