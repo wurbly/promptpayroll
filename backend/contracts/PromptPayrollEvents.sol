@@ -44,8 +44,5 @@ contract PromptPayrollEvents {
         address indexed previousAddress,
         address indexed newAddress
     );
-    event CompanyClosed(
-        string indexed companyName,
-        uint indexed timeClosed
-    );
+    event CompanyClosed(string indexed companyName, uint indexed timeClosed);
 }

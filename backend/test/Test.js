@@ -95,6 +95,22 @@ describe("PromptPayroll", function() {
     assert.strictEqual(Number(employee[4]), 0); 
   });
 
+  it("should return employeeId", async() => {
+    const { promptPayroll, employee0 } = await loadFixture(deployFixture);
+    
+    await promptPayroll.addEmployee(employee0.address, 100);
+    
+    assert.strictEqual(await promptPayroll.getEmployeeId(employee0.address), 0);
+  });
+
+  it("should return array of all employees", async() => {
+    //TODO
+  });
+
+  it("should return array of active employees", async() => {
+    //TODO
+  });
+
   it("should deactivate employee", async() => {
     const { promptPayroll, employee0 } = await loadFixture(deployFixture);
 
@@ -104,15 +120,7 @@ describe("PromptPayroll", function() {
     const employeeRecord = await promptPayroll.employees(employee0.address);
     assert.strictEqual(employeeRecord[1], false);
   });
-
-  it("should return employeeId", async() => {
-    const { promptPayroll, employee0 } = await loadFixture(deployFixture);
-    
-    await promptPayroll.addEmployee(employee0.address, 100);
-    
-    assert.strictEqual(await promptPayroll.getEmployeeId(employee0.address), 0);
-  });
-
+  
   it("should update an employee's salary", async() => {
     const { promptPayroll, employee0 } = await loadFixture(deployFixture);
 

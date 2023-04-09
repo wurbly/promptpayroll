@@ -1,11 +1,10 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 
-/* 
-    Author: wurbs
-    Limitations:
-    // Requires minimum salary of around 0.0001ETH for fractional calculations to work
-    // since Solidity doesn't support floating point numbers.
+/**
+    @title PromptPayroll
+    @author wurbs
+    @notice Requires minimum employee salary of around 0.0001ETH to work properly - floating point limitations.
 */
 
 import "./Ownable.sol";
@@ -27,8 +26,8 @@ contract PromptPayroll is Ownable, PromptPayrollEvents {
     uint public monthStart;
     uint public monthDuration;
 
-    constructor(string memory _companyName, address newOwner) {
-        companyName = _companyName;
+    constructor(string memory newCompanyName, address newOwner) {
+        companyName = newCompanyName;
         transferOwnership(newOwner);
         emit CompanyOpened(companyName, newOwner);
     }
@@ -41,7 +40,6 @@ contract PromptPayroll is Ownable, PromptPayrollEvents {
         emit CompanyNameChanged(previousName, companyName);
     }
 
-    // Add new employee record
     function addEmployee(
         address payable employeeAddress,
         uint salary
@@ -61,18 +59,38 @@ contract PromptPayroll is Ownable, PromptPayrollEvents {
         );
     }
 
-    // Remove employee (Before any salary is paid)
-    function deactivateEmployee(uint employeeId) external onlyOwner {
-        employees[employeeAddresses[employeeId]].isActive = false;
-        emit EmployeeDeactivated(employeeId, employeeAddresses[employeeId]);
-    }
-
-    // Check id
     function getEmployeeId(
         address employeeAddress
     ) public view returns (uint _id) {
         return employees[employeeAddress].id;
     }
+
+    function getEmployees() public view returns (address payable[] memory allEmployees) {
+        return employeeAddresses;
+    }
+
+    function getActiveEmployees() public view returns (address payable[] memory activeEmployees) {
+        uint activeCount = 0;
+        for(uint i = 0; i < employeeAddresses.length; i++) {
+            if(employees[employeeAddresses[i]].isActive) {
+                activeCount++;
+            }
+        }
+        
+        activeEmployees = new address payable[](activeCount);
+        uint index = 0;
+        for(uint i = 0; i < employeeAddresses.length; i++) {
+            if(employees[employeeAddresses[i]].isActive) {
+                activeEmployees[index++] = employeeAddresses[i];
+            }
+        }
+    }
+ 
+    // Used before salaries are paid. Figure out why we need this function!********
+    function deactivateEmployee(uint employeeId) external onlyOwner {
+        employees[employeeAddresses[employeeId]].isActive = false;
+        emit EmployeeDeactivated(employeeId, employeeAddresses[employeeId]);
+    }    
 
     // Change employee salary and top up difference for the current month.
     function updateSalary(uint employeeId, uint newSalary) external onlyOwner {
