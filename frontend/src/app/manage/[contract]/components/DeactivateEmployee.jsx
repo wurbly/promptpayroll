@@ -70,7 +70,7 @@ export default function DeactivateEmployee({ contractAddress, abi }){
       <FormHeading text="Deactivate Employee" />
       <Box mb={3}>
         <Text mb={3}>This deactivates the employee with the `EmployeeId`.</Text>
-        <Text mb={3}>Use this function if you've entered the wrong address for an employee and want to deactivate the entry to add a new entry. </Text>
+        <Text mb={3}>Use this function if you&apos;ve entered the wrong address for an employee and want to deactivate the entry to add a new entry. </Text>
       </Box>
       <form onSubmit={handleSubmit}>
         <FormControl isRequired>

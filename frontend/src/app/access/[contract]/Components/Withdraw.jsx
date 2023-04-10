@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Flex, Box, Heading, Text, Button, Spinner } from "@chakra-ui/react";
+import { Flex, Box, Heading, Text, Button, Link, Spinner } from "@chakra-ui/react";
 import { useContractWrite, usePrepareContractWrite } from "wagmi";
 
 export default function Withdraw({ contractAddress, abi }) {
@@ -51,7 +51,7 @@ export default function Withdraw({ contractAddress, abi }) {
         Withdraw
       </Heading>
       <Text>
-        Click "Withdraw" to withdraw any accrued salaries for the month!
+        Click `Withdraw`` to withdraw any accrued salaries for the month!
       </Text>
       <Text>
         Note: Ensure that you are signed in with your registered address on the

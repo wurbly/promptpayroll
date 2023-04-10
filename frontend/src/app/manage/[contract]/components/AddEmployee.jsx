@@ -96,7 +96,7 @@ export default function AddEmployee({ contractAddress, abi }) {
           <FormHelperText color="#BBE1FA" mb={3}>
             Please ensure that you input the correct address. Incorrectly
             entered addresses will result in the address entered having full
-            control of your employee's funds which we will be unable to recover.
+            control of that employee&apos;s funds which we will be unable to recover.
           </FormHelperText>
         </FormControl>
         <FormControl isRequired>
