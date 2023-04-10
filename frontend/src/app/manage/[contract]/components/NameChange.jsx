@@ -9,10 +9,10 @@ import {
   Input,
   FormHelperText,
   Button,
-  Spinner
+  Spinner,
 } from "@chakra-ui/react";
 import { useContractWrite, usePrepareContractWrite } from "wagmi";
-import FormHeading from './FormHeading';
+import FormHeading from "./FormHeading";
 
 export default function NameChange({ contractAddress, abi }) {
   const [companyName, setCompanyName] = useState("");
@@ -23,7 +23,7 @@ export default function NameChange({ contractAddress, abi }) {
     address: contractAddress,
     abi: abi,
     functionName: "changeCompanyName",
-    args: [companyName]
+    args: [companyName],
   });
 
   const {
@@ -34,7 +34,7 @@ export default function NameChange({ contractAddress, abi }) {
     isError,
     error,
     write,
-    status: txStatus
+    status: txStatus,
   } = useContractWrite(config);
 
   useEffect(() => {
@@ -76,21 +76,21 @@ export default function NameChange({ contractAddress, abi }) {
             This transaction will cost gas.
           </FormHelperText>
         </FormControl>
-        <Button type="submit" colorScheme="red" mb={3} width='100%' p="auto">
+        <Button type="submit" colorScheme="red" mb={3} width="100%" p="auto">
           {isLoading ? <Spinner /> : "Change Name"}
         </Button>
       </form>
       <Box width="100%" bgColor="#0F4C75" p={3} mb={3}>
-          <Text>{statusMessage}</Text>
-          {txHash && (
-            <Text>
-              Txhash:&nbsp;
-              <Link href={`https://sepolia.etherscan.io/tx/${txHash}`} isExternal>
-                {txHash}
-              </Link>
-            </Text>
-          )}
-        </Box>
+        <Text>{statusMessage}</Text>
+        {txHash && (
+          <Text>
+            Txhash:&nbsp;
+            <Link href={`https://sepolia.etherscan.io/tx/${txHash}`} isExternal>
+              {txHash}
+            </Link>
+          </Text>
+        )}
+      </Box>
     </Flex>
   );
 }

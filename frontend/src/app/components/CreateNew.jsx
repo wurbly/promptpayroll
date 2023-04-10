@@ -22,13 +22,13 @@ export default function CreateNew() {
     useAccount();
 
   const { config } = usePrepareContractWrite({
-    address: "0x9CeF7EdFe1A1c3C9679ED1F1Bc2d2ceEAFf76723",
+    address: "0x3910B7fC6D16FA3973c10ac8C6182980D5D26231",
     abi: [
       {
         inputs: [
           {
             internalType: "string",
-            name: "_companyName",
+            name: "newCompanyName",
             type: "string",
           },
         ],

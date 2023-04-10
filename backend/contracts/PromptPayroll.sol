@@ -4,7 +4,9 @@ pragma solidity ^0.8.19;
 /**
     @title PromptPayroll
     @author wurbs
-    @notice Requires minimum employee salary of around 0.0001ETH to work properly - floating point limitations.
+    @dev Requires minimum employee salary of around 0.0001ETH to work properly
+    due to floating point limitations.
+    WIP.
 */
 
 import "./Ownable.sol";
@@ -20,7 +22,7 @@ contract PromptPayroll is Ownable, PromptPayrollEvents {
         uint balance;
         uint lastWithdrawal; // time of last withdrawal, or start of month if no withdrawals were made.
     }
-    
+
     mapping(address => Employee) public employees;
     address payable[] public employeeAddresses;
     uint public monthStart;
@@ -61,42 +63,37 @@ contract PromptPayroll is Ownable, PromptPayrollEvents {
 
     function getEmployeeId(
         address employeeAddress
-    ) public view returns (uint _id) {
+    ) public view returns (uint id) {
         return employees[employeeAddress].id;
     }
 
-    function getEmployees() public view returns (address payable[] memory allEmployees) {
+    function getEmployees()
+        public
+        view
+        returns (address payable[] memory allEmployees)
+    {
         return employeeAddresses;
     }
 
-    function getActiveEmployees() public view returns (address payable[] memory activeEmployees) {
+    function getActiveEmployees()
+        public
+        view
+        returns (address payable[] memory activeEmployees)
+    {
         uint activeCount = 0;
-        for(uint i = 0; i < employeeAddresses.length; i++) {
-            if(employees[employeeAddresses[i]].isActive) {
+        for (uint i = 0; i < employeeAddresses.length; i++) {
+            if (employees[employeeAddresses[i]].isActive) {
                 activeCount++;
             }
         }
-        
+
         activeEmployees = new address payable[](activeCount);
         uint index = 0;
-        for(uint i = 0; i < employeeAddresses.length; i++) {
-            if(employees[employeeAddresses[i]].isActive) {
+        for (uint i = 0; i < employeeAddresses.length; i++) {
+            if (employees[employeeAddresses[i]].isActive) {
                 activeEmployees[index++] = employeeAddresses[i];
             }
         }
-    }
- 
-    // Used before salaries are paid. Figure out why we need this function!********
-    function deactivateEmployee(uint employeeId) external onlyOwner {
-        employees[employeeAddresses[employeeId]].isActive = false;
-        emit EmployeeDeactivated(employeeId, employeeAddresses[employeeId]);
-    }    
-
-    // Change employee salary and top up difference for the current month.
-    function updateSalary(uint employeeId, uint newSalary) external onlyOwner {
-        uint previousSalary = employees[employeeAddresses[employeeId]].salary;
-        employees[employeeAddresses[employeeId]].salary = newSalary;
-        emit SalaryUpdated(employeeId, previousSalary, newSalary);
     }
 
     function totalSalaries() public view returns (uint total) {
@@ -108,7 +105,40 @@ contract PromptPayroll is Ownable, PromptPayrollEvents {
         }
     }
 
-    // Deposit salaries for all employees
+    // Used before salary is issued, or if accrued salary is negligible (less than 1 wei)
+    function deactivateEmployee(uint employeeId) external onlyOwner {
+        employees[employeeAddresses[employeeId]].isActive = false;
+        emit EmployeeDeactivated(employeeId, employeeAddresses[employeeId]);
+    }
+
+    function updateSalary(
+        uint employeeId,
+        uint newSalary
+    ) external payable onlyOwner {
+        require(
+            newSalary != employees[employeeAddresses[employeeId]].salary,
+            "Salary is the same."
+        );
+        uint previousSalary = employees[employeeAddresses[employeeId]].salary;
+        employees[employeeAddresses[employeeId]].salary = newSalary;
+
+        if (previousSalary > newSalary) {
+            uint diff = previousSalary - newSalary;
+            employees[employeeAddresses[employeeId]].balance -= diff;
+            (bool success, ) = msg.sender.call{value: diff}("");
+            require(success, "Excess salary refund failed");
+        } else if (previousSalary < newSalary) {
+            uint diff = newSalary - previousSalary;
+            require(
+                msg.value == diff,
+                "You didn't top up the salary increment!"
+            );
+            employees[employeeAddresses[employeeId]].balance += diff;
+        }
+
+        emit SalaryUpdated(employeeId, previousSalary, newSalary);
+    }
+
     function depositSalaries(uint daysInMonth) external payable onlyOwner {
         // Check that correct total salary is deposited
         require(msg.value == totalSalaries(), "Wrong total salary deposited");
@@ -147,7 +177,36 @@ contract PromptPayroll is Ownable, PromptPayrollEvents {
         emit SalariesDeposited(msg.value, daysInMonth, block.timestamp);
     }
 
-    // Remove employee, pay salaries due, collect balance
+    function withdrawableSalary(
+        address employeeAddress
+    ) public view returns (uint withdrawable) {
+        withdrawable =
+            ((block.timestamp - employees[employeeAddress].lastWithdrawal) *
+                employees[employeeAddress].salary) /
+            monthDuration;
+    }
+
+    function withdrawSalary() public onlyEmployee {
+        uint withdrawable = withdrawableSalary(msg.sender);
+        require(withdrawable > 0, "No salary available to withdraw!");
+        // This should logically never happen
+        require(
+            withdrawable <= employees[msg.sender].balance,
+            "Your balance is insufficient"
+        );
+
+        employees[msg.sender].lastWithdrawal = block.timestamp;
+        employees[msg.sender].balance -= withdrawable;
+        (bool success, ) = msg.sender.call{value: withdrawable}("");
+        require(success, "Withdrawal unsuccessful");
+
+        emit SalaryWithdrawal(
+            employees[msg.sender].id,
+            withdrawable,
+            block.timestamp
+        );
+    }
+
     function terminateEmployee(uint employeeId) external onlyOwner {
         require(
             employees[employeeAddresses[employeeId]].isActive,
@@ -157,7 +216,7 @@ contract PromptPayroll is Ownable, PromptPayrollEvents {
         employees[employeeAddresses[employeeId]].isActive = false;
 
         // Get employee / employer balance and pay.
-        // Note: Salary is multiplied first because (elapsedTime/monthDuration) will result in rounding to 0.
+        // Salary is multiplied first because (elapsedTime/monthDuration) will result in rounding to 0.
         // This requires a minimum salary of around 0.0001 ETH.
         uint dueBalance = ((block.timestamp -
             employees[employeeAddresses[employeeId]].lastWithdrawal) *
@@ -182,39 +241,21 @@ contract PromptPayroll is Ownable, PromptPayrollEvents {
         emit EmployeeTerminated(employeeId, dueBalance, unspentBalance);
     }
 
-    function viewBalanceByAddress(
+    function viewBalance(
         address employeeAddress
     ) public view returns (uint balance) {
         return employees[employeeAddress].balance;
     }
 
-    function viewBalanceById(
-        uint employeeId
-    ) public view returns (uint balance) {
-        return employees[employeeAddresses[employeeId]].balance;
+    function totalBalances() public view returns (uint total) {
+        total = 0;
+        for (uint i = 0; i < employeeAddresses.length; i++) {
+            if (employees[employeeAddresses[i]].isActive) {
+                total += viewBalance(employeeAddresses[i]);
+            }
+        }
     }
 
-    // Employee withdrawal:
-    // Only can withdraw amount based on timestamp. No specification of amount.
-    function withdrawSalary() public onlyEmployee {
-        uint withdrawable = ((block.timestamp -
-            employees[msg.sender].lastWithdrawal) *
-            employees[msg.sender].salary) / monthDuration;
-        require(withdrawable > 0, "No salary available to withdraw!");
-
-        employees[msg.sender].lastWithdrawal = block.timestamp;
-        employees[msg.sender].balance -= withdrawable;
-        (bool success, ) = msg.sender.call{value: withdrawable}("");
-        require(success, "Withdrawal unsuccessful");
-
-        emit SalaryWithdrawal(
-            employees[msg.sender].id,
-            withdrawable,
-            block.timestamp
-        );
-    }
-
-    // Employee change address:
     function changeAddress(address payable newAddress) external onlyEmployee {
         uint employeeId = getEmployeeId(msg.sender);
         Employee memory employee = employees[msg.sender];

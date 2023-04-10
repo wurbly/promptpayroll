@@ -104,11 +104,39 @@ describe("PromptPayroll", function() {
   });
 
   it("should return array of all employees", async() => {
-    //TODO
+    const { promptPayroll, employee0, employee1 } = await loadFixture(deployFixture);
+
+    await promptPayroll.addEmployee(employee0.address, 100);
+    await promptPayroll.addEmployee(employee1.address, 150);
+    await promptPayroll.deactivateEmployee(0);
+
+    const employeeArr = await promptPayroll.getEmployees();
+
+    assert.strictEqual(employeeArr.length, 2);
+    assert.strictEqual(employeeArr[0], employee0.address);
+    assert.strictEqual(employeeArr[1], employee1.address);
   });
 
   it("should return array of active employees", async() => {
-    //TODO
+    const { promptPayroll, employee0, employee1 } = await loadFixture(deployFixture);
+
+    await promptPayroll.addEmployee(employee0.address, 100);
+    await promptPayroll.addEmployee(employee1.address, 150);
+    await promptPayroll.deactivateEmployee(0);
+
+    const employeeArr = await promptPayroll.getActiveEmployees();
+
+    assert.strictEqual(employeeArr.length, 1);
+    assert.strictEqual(employeeArr[0], employee1.address);
+  });
+
+  it("should return total salaries", async() => {
+    const { promptPayroll, employee0, employee1 } = await loadFixture(deployFixture);
+    
+    await promptPayroll.addEmployee(employee0.address, 6);
+    await promptPayroll.addEmployee(employee1.address, 9);
+
+    assert.strictEqual(await promptPayroll.totalSalaries(), 15);
   });
 
   it("should deactivate employee", async() => {
@@ -121,22 +149,87 @@ describe("PromptPayroll", function() {
     assert.strictEqual(employeeRecord[1], false);
   });
   
-  it("should update an employee's salary", async() => {
+  it("should update an employee's salary and balance", async() => {
     const { promptPayroll, employee0 } = await loadFixture(deployFixture);
 
     await promptPayroll.addEmployee(employee0.address, 0);
-    await promptPayroll.updateSalary(0, 69);
+    await promptPayroll.updateSalary(0, 69, {value: 69});
     const employee = await promptPayroll.employees(employee0.address);
     assert.strictEqual(Number(employee[2]), 69);
+    assert.strictEqual(Number(employee[3]), 69);
   });
 
-  it("should return total salaries", async() => {
-    const { promptPayroll, employee0, employee1 } = await loadFixture(deployFixture);
-    
-    await promptPayroll.addEmployee(employee0.address, 6);
-    await promptPayroll.addEmployee(employee1.address, 9);
+  it("should refund excess salaries deposited if salary is reduced", async() => {
+    const { promptPayroll, employer, employee0 } = await loadFixture(deployFixture);
 
-    assert.strictEqual(await promptPayroll.totalSalaries(), 15);
+    await promptPayroll.addEmployee(employee0.address, 1000000000000000);
+    await promptPayroll.depositSalaries(30, { value: 1000000000000000});
+    const balanceBefore = await ethers.provider.getBalance(employer.address);
+
+    await promptPayroll.updateSalary(0, 100);
+    const balanceAfter = await ethers.provider.getBalance(employer.address);
+    assert.isAbove(balanceAfter, balanceBefore); 
+  });
+
+  it("should require minimum salary to be topped up!", async() => {
+    const { promptPayroll, employee0 } = await loadFixture(deployFixture);
+
+    await promptPayroll.addEmployee(employee0.address, 0);
+
+    try {
+      await promptPayroll.updateSalary(0, 69);
+      assert.fail();
+    } catch (err) {
+      assert(err);
+    }
+  });
+
+  it("should only allow an employee to use onlyEmployee functions", async() => {
+    const { promptPayroll, employee0 } = await loadFixture(deployFixture);
+
+    await promptPayroll.addEmployee(employee0.address, 1000000000000000);
+    await promptPayroll.depositSalaries(30, { value: 1000000000000000 });
+
+    mine(500);
+    try { 
+      await promptPayroll.withdrawSalary();
+      assert.fail();
+    } catch (err) {
+      assert(err);
+    }
+  });
+
+  it("should reduce balance of employee after withdrawal", async() => {
+    const { promptPayroll, employee0 } = await loadFixture(deployFixture);
+
+    await promptPayroll.addEmployee(employee0.address, 1000000000000000);
+    await promptPayroll.depositSalaries(30, { value: 1000000000000000 });
+
+    const employeeBefore = await promptPayroll.employees(employee0.address);
+    const balanceBefore = employeeBefore[3];
+    
+    mine(500);
+    const employeeConnected = promptPayroll.connect(employee0);
+    await employeeConnected.withdrawSalary();
+    const employeeAfter = await employeeConnected.employees(employee0.address);
+    const balanceAfter = employeeAfter[3];
+
+    assert.isBelow(balanceAfter, balanceBefore);
+  });
+
+  it("should transfer withdrawn salary to employee", async() => {
+    const { promptPayroll, employee0 } = await loadFixture(deployFixture);
+
+    await promptPayroll.addEmployee(employee0.address, 1000000000000000);
+    await promptPayroll.depositSalaries(30, { value: 1000000000000000 });
+
+    const beforeWithdrawal = await ethers.provider.getBalance(employee0.address);
+    
+    mine(500000);
+    const employeeConnected = promptPayroll.connect(employee0);
+    await employeeConnected.withdrawSalary();
+    const afterWithdrawal = await ethers.provider.getBalance(employee0.address);
+    assert.isAbove(afterWithdrawal, beforeWithdrawal);
   });
 
   it("should return total salaries of only active employees", async() => {
@@ -200,74 +293,26 @@ describe("PromptPayroll", function() {
     assert.isAbove(employerAfterBalance, employerBeforeBalance);
   });
 
-  it("should return balance of an employee by address", async() => {
+  it("should return balance of an employee", async() => {
     
     const { promptPayroll, employee0 } = await loadFixture(deployFixture);
 
     await promptPayroll.addEmployee(employee0.address, 1000000000000000);
     await promptPayroll.depositSalaries(30, { value: 1000000000000000 });
 
-    assert.strictEqual(await promptPayroll.viewBalanceByAddress(employee0.address), 1000000000000000);
+    assert.strictEqual(await promptPayroll.viewBalance(employee0.address), 1000000000000000);
   });
 
-  it("should return balance of an employee by id", async() => {
-    
-    const { promptPayroll, employee0 } = await loadFixture(deployFixture);
+  it("should return total balances of all employees", async() => {
+    const { promptPayroll, employee0, employee1 } = await loadFixture(deployFixture);
 
     await promptPayroll.addEmployee(employee0.address, 1000000000000000);
-    await promptPayroll.depositSalaries(30, { value: 1000000000000000 });
+    await promptPayroll.addEmployee(employee1.address, 1000000000000000);
+    await promptPayroll.depositSalaries(30, { value: 2000000000000000 });
 
-    assert.strictEqual(await promptPayroll.viewBalanceById(0), 1000000000000000);
+    assert.strictEqual(await promptPayroll.totalBalances(), 2000000000000000);
   });
 
-  it("should only allow an employee to use onlyEmployee functions", async() => {
-    const { promptPayroll, employee0 } = await loadFixture(deployFixture);
-
-    await promptPayroll.addEmployee(employee0.address, 1000000000000000);
-    await promptPayroll.depositSalaries(30, { value: 1000000000000000 });
-
-    mine(500000);
-    try { 
-      await promptPayroll.withdrawSalary();
-      assert.fail();
-    } catch (err) {
-      assert(err);
-    }
-  });
-
-  it("should reduce balance of employee after withdrawal", async() => {
-    const { promptPayroll, employee0 } = await loadFixture(deployFixture);
-
-    await promptPayroll.addEmployee(employee0.address, 1000000000000000);
-    await promptPayroll.depositSalaries(30, { value: 1000000000000000 });
-
-    const employeeBefore = await promptPayroll.employees(employee0.address);
-    const balanceBefore = employeeBefore[3];
-    
-    mine(500000);
-    const employeeConnected = promptPayroll.connect(employee0);
-    await employeeConnected.withdrawSalary();
-    const employeeAfter = await employeeConnected.employees(employee0.address);
-    const balanceAfter = employeeAfter[3];
-
-    assert.isBelow(balanceAfter, balanceBefore);
-  });
-
-  it("should transfer withdrawn salary to employee", async() => {
-    const { promptPayroll, employee0 } = await loadFixture(deployFixture);
-
-    await promptPayroll.addEmployee(employee0.address, 1000000000000000);
-    await promptPayroll.depositSalaries(30, { value: 1000000000000000 });
-
-    const beforeWithdrawal = await ethers.provider.getBalance(employee0.address);
-    
-    mine(500000);
-    const employeeConnected = promptPayroll.connect(employee0);
-    await employeeConnected.withdrawSalary();
-    const afterWithdrawal = await ethers.provider.getBalance(employee0.address);
-    assert.isAbove(afterWithdrawal, beforeWithdrawal);
-  });
-  
   it("should update employeeAddresses array when an employee changes address", async() => {
     const { promptPayroll, employee0, employee1 } = await loadFixture(deployFixture);
 

@@ -10,617 +10,664 @@ import {
   Button,
   Link,
 } from "@chakra-ui/react";
-import NextLink from 'next/link';
+import NextLink from "next/link";
 import { ethers } from "ethers";
 import { useContractRead } from "wagmi";
 
 export default function ContractCard({ address }) {
   const abi = [
     {
-      inputs: [
+      "inputs": [
         {
-          internalType: "string",
-          name: "_companyName",
-          type: "string",
+          "internalType": "string",
+          "name": "newCompanyName",
+          "type": "string"
         },
         {
-          internalType: "address",
-          name: "newOwner",
-          type: "address",
-        },
+          "internalType": "address",
+          "name": "newOwner",
+          "type": "address"
+        }
       ],
-      stateMutability: "nonpayable",
-      type: "constructor",
+      "stateMutability": "nonpayable",
+      "type": "constructor"
     },
     {
-      anonymous: false,
-      inputs: [
+      "anonymous": false,
+      "inputs": [
         {
-          indexed: true,
-          internalType: "string",
-          name: "companyName",
-          type: "string",
+          "indexed": true,
+          "internalType": "string",
+          "name": "companyName",
+          "type": "string"
         },
         {
-          indexed: true,
-          internalType: "uint256",
-          name: "timeClosed",
-          type: "uint256",
-        },
+          "indexed": true,
+          "internalType": "uint256",
+          "name": "timeClosed",
+          "type": "uint256"
+        }
       ],
-      name: "CompanyClosed",
-      type: "event",
+      "name": "CompanyClosed",
+      "type": "event"
     },
     {
-      anonymous: false,
-      inputs: [
+      "anonymous": false,
+      "inputs": [
         {
-          indexed: true,
-          internalType: "string",
-          name: "previousName",
-          type: "string",
+          "indexed": true,
+          "internalType": "string",
+          "name": "previousName",
+          "type": "string"
         },
         {
-          indexed: true,
-          internalType: "string",
-          name: "newName",
-          type: "string",
-        },
+          "indexed": true,
+          "internalType": "string",
+          "name": "newName",
+          "type": "string"
+        }
       ],
-      name: "CompanyNameChanged",
-      type: "event",
+      "name": "CompanyNameChanged",
+      "type": "event"
     },
     {
-      anonymous: false,
-      inputs: [
+      "anonymous": false,
+      "inputs": [
         {
-          indexed: true,
-          internalType: "string",
-          name: "companyName",
-          type: "string",
+          "indexed": true,
+          "internalType": "string",
+          "name": "companyName",
+          "type": "string"
         },
         {
-          indexed: true,
-          internalType: "address",
-          name: "companyOwner",
-          type: "address",
-        },
+          "indexed": true,
+          "internalType": "address",
+          "name": "companyOwner",
+          "type": "address"
+        }
       ],
-      name: "CompanyOpened",
-      type: "event",
+      "name": "CompanyOpened",
+      "type": "event"
     },
     {
-      anonymous: false,
-      inputs: [
+      "anonymous": false,
+      "inputs": [
         {
-          indexed: true,
-          internalType: "uint256",
-          name: "employeeId",
-          type: "uint256",
+          "indexed": true,
+          "internalType": "uint256",
+          "name": "employeeId",
+          "type": "uint256"
         },
         {
-          indexed: true,
-          internalType: "address",
-          name: "employeeAddress",
-          type: "address",
+          "indexed": true,
+          "internalType": "address",
+          "name": "employeeAddress",
+          "type": "address"
         },
         {
-          indexed: true,
-          internalType: "uint256",
-          name: "employeeSalary",
-          type: "uint256",
-        },
+          "indexed": true,
+          "internalType": "uint256",
+          "name": "employeeSalary",
+          "type": "uint256"
+        }
       ],
-      name: "EmployeeAdded",
-      type: "event",
+      "name": "EmployeeAdded",
+      "type": "event"
     },
     {
-      anonymous: false,
-      inputs: [
+      "anonymous": false,
+      "inputs": [
         {
-          indexed: true,
-          internalType: "uint256",
-          name: "employeeId",
-          type: "uint256",
+          "indexed": true,
+          "internalType": "uint256",
+          "name": "employeeId",
+          "type": "uint256"
         },
         {
-          indexed: true,
-          internalType: "address",
-          name: "previousAddress",
-          type: "address",
+          "indexed": true,
+          "internalType": "address",
+          "name": "previousAddress",
+          "type": "address"
         },
         {
-          indexed: true,
-          internalType: "address",
-          name: "newAddress",
-          type: "address",
-        },
+          "indexed": true,
+          "internalType": "address",
+          "name": "newAddress",
+          "type": "address"
+        }
       ],
-      name: "EmployeeAddressChanged",
-      type: "event",
+      "name": "EmployeeAddressChanged",
+      "type": "event"
     },
     {
-      anonymous: false,
-      inputs: [
+      "anonymous": false,
+      "inputs": [
         {
-          indexed: true,
-          internalType: "uint256",
-          name: "employeeId",
-          type: "uint256",
+          "indexed": true,
+          "internalType": "uint256",
+          "name": "employeeId",
+          "type": "uint256"
         },
         {
-          indexed: true,
-          internalType: "address",
-          name: "employeeAddress",
-          type: "address",
-        },
+          "indexed": true,
+          "internalType": "address",
+          "name": "employeeAddress",
+          "type": "address"
+        }
       ],
-      name: "EmployeeDeactivated",
-      type: "event",
+      "name": "EmployeeDeactivated",
+      "type": "event"
     },
     {
-      anonymous: false,
-      inputs: [
+      "anonymous": false,
+      "inputs": [
         {
-          indexed: true,
-          internalType: "uint256",
-          name: "employeeId",
-          type: "uint256",
+          "indexed": true,
+          "internalType": "uint256",
+          "name": "employeeId",
+          "type": "uint256"
         },
         {
-          indexed: true,
-          internalType: "uint256",
-          name: "dueSalaryPaid",
-          type: "uint256",
+          "indexed": true,
+          "internalType": "uint256",
+          "name": "dueSalaryPaid",
+          "type": "uint256"
         },
         {
-          indexed: true,
-          internalType: "uint256",
-          name: "unusedSalaryRefunded",
-          type: "uint256",
-        },
+          "indexed": true,
+          "internalType": "uint256",
+          "name": "unusedSalaryRefunded",
+          "type": "uint256"
+        }
       ],
-      name: "EmployeeTerminated",
-      type: "event",
+      "name": "EmployeeTerminated",
+      "type": "event"
     },
     {
-      anonymous: false,
-      inputs: [
+      "anonymous": false,
+      "inputs": [
         {
-          indexed: true,
-          internalType: "address",
-          name: "previousOwner",
-          type: "address",
+          "indexed": true,
+          "internalType": "address",
+          "name": "previousOwner",
+          "type": "address"
         },
         {
-          indexed: true,
-          internalType: "address",
-          name: "newOwner",
-          type: "address",
-        },
+          "indexed": true,
+          "internalType": "address",
+          "name": "newOwner",
+          "type": "address"
+        }
       ],
-      name: "OwnershipTransferred",
-      type: "event",
+      "name": "OwnershipTransferred",
+      "type": "event"
     },
     {
-      anonymous: false,
-      inputs: [
+      "anonymous": false,
+      "inputs": [
         {
-          indexed: true,
-          internalType: "uint256",
-          name: "totalDeposited",
-          type: "uint256",
+          "indexed": true,
+          "internalType": "uint256",
+          "name": "totalDeposited",
+          "type": "uint256"
         },
         {
-          indexed: true,
-          internalType: "uint256",
-          name: "numberOfDays",
-          type: "uint256",
+          "indexed": true,
+          "internalType": "uint256",
+          "name": "numberOfDays",
+          "type": "uint256"
         },
         {
-          indexed: true,
-          internalType: "uint256",
-          name: "monthStartTimestamp",
-          type: "uint256",
-        },
+          "indexed": true,
+          "internalType": "uint256",
+          "name": "monthStartTimestamp",
+          "type": "uint256"
+        }
       ],
-      name: "SalariesDeposited",
-      type: "event",
+      "name": "SalariesDeposited",
+      "type": "event"
     },
     {
-      anonymous: false,
-      inputs: [
+      "anonymous": false,
+      "inputs": [
         {
-          indexed: true,
-          internalType: "uint256",
-          name: "employeeId",
-          type: "uint256",
+          "indexed": true,
+          "internalType": "uint256",
+          "name": "employeeId",
+          "type": "uint256"
         },
         {
-          indexed: true,
-          internalType: "uint256",
-          name: "previousSalary",
-          type: "uint256",
+          "indexed": true,
+          "internalType": "uint256",
+          "name": "previousSalary",
+          "type": "uint256"
         },
         {
-          indexed: true,
-          internalType: "uint256",
-          name: "newSalary",
-          type: "uint256",
-        },
+          "indexed": true,
+          "internalType": "uint256",
+          "name": "newSalary",
+          "type": "uint256"
+        }
       ],
-      name: "SalaryUpdated",
-      type: "event",
+      "name": "SalaryUpdated",
+      "type": "event"
     },
     {
-      anonymous: false,
-      inputs: [
+      "anonymous": false,
+      "inputs": [
         {
-          indexed: true,
-          internalType: "uint256",
-          name: "employeeId",
-          type: "uint256",
+          "indexed": true,
+          "internalType": "uint256",
+          "name": "employeeId",
+          "type": "uint256"
         },
         {
-          indexed: true,
-          internalType: "uint256",
-          name: "amountWithdrawn",
-          type: "uint256",
+          "indexed": true,
+          "internalType": "uint256",
+          "name": "amountWithdrawn",
+          "type": "uint256"
         },
         {
-          indexed: true,
-          internalType: "uint256",
-          name: "timeWithdrawn",
-          type: "uint256",
-        },
+          "indexed": true,
+          "internalType": "uint256",
+          "name": "timeWithdrawn",
+          "type": "uint256"
+        }
       ],
-      name: "SalaryWithdrawal",
-      type: "event",
+      "name": "SalaryWithdrawal",
+      "type": "event"
     },
     {
-      inputs: [
+      "inputs": [
         {
-          internalType: "address payable",
-          name: "employeeAddress",
-          type: "address",
+          "internalType": "address payable",
+          "name": "employeeAddress",
+          "type": "address"
         },
         {
-          internalType: "uint256",
-          name: "salary",
-          type: "uint256",
-        },
+          "internalType": "uint256",
+          "name": "salary",
+          "type": "uint256"
+        }
       ],
-      name: "addEmployee",
-      outputs: [],
-      stateMutability: "nonpayable",
-      type: "function",
+      "name": "addEmployee",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
     },
     {
-      inputs: [
+      "inputs": [
         {
-          internalType: "address payable",
-          name: "newAddress",
-          type: "address",
-        },
+          "internalType": "address payable",
+          "name": "newAddress",
+          "type": "address"
+        }
       ],
-      name: "changeAddress",
-      outputs: [],
-      stateMutability: "nonpayable",
-      type: "function",
+      "name": "changeAddress",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
     },
     {
-      inputs: [
+      "inputs": [
         {
-          internalType: "string",
-          name: "newCompanyName",
-          type: "string",
-        },
+          "internalType": "string",
+          "name": "newCompanyName",
+          "type": "string"
+        }
       ],
-      name: "changeCompanyName",
-      outputs: [],
-      stateMutability: "nonpayable",
-      type: "function",
+      "name": "changeCompanyName",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
     },
     {
-      inputs: [],
-      name: "closeCompany",
-      outputs: [],
-      stateMutability: "nonpayable",
-      type: "function",
+      "inputs": [],
+      "name": "closeCompany",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
     },
     {
-      inputs: [],
-      name: "companyName",
-      outputs: [
+      "inputs": [],
+      "name": "companyName",
+      "outputs": [
         {
-          internalType: "string",
-          name: "",
-          type: "string",
-        },
+          "internalType": "string",
+          "name": "",
+          "type": "string"
+        }
       ],
-      stateMutability: "view",
-      type: "function",
+      "stateMutability": "view",
+      "type": "function"
     },
     {
-      inputs: [
+      "inputs": [
         {
-          internalType: "uint256",
-          name: "employeeId",
-          type: "uint256",
-        },
+          "internalType": "uint256",
+          "name": "employeeId",
+          "type": "uint256"
+        }
       ],
-      name: "deactivateEmployee",
-      outputs: [],
-      stateMutability: "nonpayable",
-      type: "function",
+      "name": "deactivateEmployee",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
     },
     {
-      inputs: [
+      "inputs": [
         {
-          internalType: "uint256",
-          name: "daysInMonth",
-          type: "uint256",
-        },
+          "internalType": "uint256",
+          "name": "daysInMonth",
+          "type": "uint256"
+        }
       ],
-      name: "depositSalaries",
-      outputs: [],
-      stateMutability: "payable",
-      type: "function",
+      "name": "depositSalaries",
+      "outputs": [],
+      "stateMutability": "payable",
+      "type": "function"
     },
     {
-      inputs: [
+      "inputs": [
         {
-          internalType: "uint256",
-          name: "",
-          type: "uint256",
-        },
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
       ],
-      name: "employeeAddresses",
-      outputs: [
+      "name": "employeeAddresses",
+      "outputs": [
         {
-          internalType: "address payable",
-          name: "",
-          type: "address",
-        },
+          "internalType": "address payable",
+          "name": "",
+          "type": "address"
+        }
       ],
-      stateMutability: "view",
-      type: "function",
+      "stateMutability": "view",
+      "type": "function"
     },
     {
-      inputs: [
+      "inputs": [
         {
-          internalType: "address",
-          name: "",
-          type: "address",
-        },
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
       ],
-      name: "employees",
-      outputs: [
+      "name": "employees",
+      "outputs": [
         {
-          internalType: "uint256",
-          name: "id",
-          type: "uint256",
+          "internalType": "uint256",
+          "name": "id",
+          "type": "uint256"
         },
         {
-          internalType: "bool",
-          name: "isActive",
-          type: "bool",
+          "internalType": "bool",
+          "name": "isActive",
+          "type": "bool"
         },
         {
-          internalType: "uint256",
-          name: "salary",
-          type: "uint256",
+          "internalType": "uint256",
+          "name": "salary",
+          "type": "uint256"
         },
         {
-          internalType: "uint256",
-          name: "balance",
-          type: "uint256",
+          "internalType": "uint256",
+          "name": "balance",
+          "type": "uint256"
         },
         {
-          internalType: "uint256",
-          name: "lastWithdrawal",
-          type: "uint256",
-        },
+          "internalType": "uint256",
+          "name": "lastWithdrawal",
+          "type": "uint256"
+        }
       ],
-      stateMutability: "view",
-      type: "function",
+      "stateMutability": "view",
+      "type": "function"
     },
     {
-      inputs: [
+      "inputs": [],
+      "name": "getActiveEmployees",
+      "outputs": [
         {
-          internalType: "address",
-          name: "employeeAddress",
-          type: "address",
-        },
+          "internalType": "address payable[]",
+          "name": "activeEmployees",
+          "type": "address[]"
+        }
       ],
-      name: "getEmployeeId",
-      outputs: [
-        {
-          internalType: "uint256",
-          name: "_id",
-          type: "uint256",
-        },
-      ],
-      stateMutability: "view",
-      type: "function",
+      "stateMutability": "view",
+      "type": "function"
     },
     {
-      inputs: [
+      "inputs": [
         {
-          internalType: "address",
-          name: "employeeAddress",
-          type: "address",
-        },
+          "internalType": "address",
+          "name": "employeeAddress",
+          "type": "address"
+        }
       ],
-      name: "isEmployee",
-      outputs: [
+      "name": "getEmployeeId",
+      "outputs": [
         {
-          internalType: "bool",
-          name: "employee",
-          type: "bool",
-        },
+          "internalType": "uint256",
+          "name": "id",
+          "type": "uint256"
+        }
       ],
-      stateMutability: "view",
-      type: "function",
+      "stateMutability": "view",
+      "type": "function"
     },
     {
-      inputs: [],
-      name: "monthDuration",
-      outputs: [
+      "inputs": [],
+      "name": "getEmployees",
+      "outputs": [
         {
-          internalType: "uint256",
-          name: "",
-          type: "uint256",
-        },
+          "internalType": "address payable[]",
+          "name": "allEmployees",
+          "type": "address[]"
+        }
       ],
-      stateMutability: "view",
-      type: "function",
+      "stateMutability": "view",
+      "type": "function"
     },
     {
-      inputs: [],
-      name: "monthStart",
-      outputs: [
+      "inputs": [
         {
-          internalType: "uint256",
-          name: "",
-          type: "uint256",
-        },
+          "internalType": "address",
+          "name": "employeeAddress",
+          "type": "address"
+        }
       ],
-      stateMutability: "view",
-      type: "function",
+      "name": "isEmployee",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "employee",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
     },
     {
-      inputs: [],
-      name: "owner",
-      outputs: [
+      "inputs": [],
+      "name": "monthDuration",
+      "outputs": [
         {
-          internalType: "address",
-          name: "",
-          type: "address",
-        },
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
       ],
-      stateMutability: "view",
-      type: "function",
+      "stateMutability": "view",
+      "type": "function"
     },
     {
-      inputs: [],
-      name: "renounceOwnership",
-      outputs: [],
-      stateMutability: "nonpayable",
-      type: "function",
+      "inputs": [],
+      "name": "monthStart",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
     },
     {
-      inputs: [
+      "inputs": [],
+      "name": "owner",
+      "outputs": [
         {
-          internalType: "uint256",
-          name: "employeeId",
-          type: "uint256",
-        },
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
       ],
-      name: "terminateEmployee",
-      outputs: [],
-      stateMutability: "nonpayable",
-      type: "function",
+      "stateMutability": "view",
+      "type": "function"
     },
     {
-      inputs: [],
-      name: "totalSalaries",
-      outputs: [
-        {
-          internalType: "uint256",
-          name: "total",
-          type: "uint256",
-        },
-      ],
-      stateMutability: "view",
-      type: "function",
+      "inputs": [],
+      "name": "renounceOwnership",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
     },
     {
-      inputs: [
+      "inputs": [
         {
-          internalType: "address",
-          name: "newOwner",
-          type: "address",
-        },
+          "internalType": "uint256",
+          "name": "employeeId",
+          "type": "uint256"
+        }
       ],
-      name: "transferOwnership",
-      outputs: [],
-      stateMutability: "nonpayable",
-      type: "function",
+      "name": "terminateEmployee",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
     },
     {
-      inputs: [
+      "inputs": [],
+      "name": "totalBalances",
+      "outputs": [
         {
-          internalType: "uint256",
-          name: "employeeId",
-          type: "uint256",
-        },
-        {
-          internalType: "uint256",
-          name: "newSalary",
-          type: "uint256",
-        },
+          "internalType": "uint256",
+          "name": "total",
+          "type": "uint256"
+        }
       ],
-      name: "updateSalary",
-      outputs: [],
-      stateMutability: "nonpayable",
-      type: "function",
+      "stateMutability": "view",
+      "type": "function"
     },
     {
-      inputs: [
+      "inputs": [],
+      "name": "totalSalaries",
+      "outputs": [
         {
-          internalType: "address",
-          name: "employeeAddress",
-          type: "address",
-        },
+          "internalType": "uint256",
+          "name": "total",
+          "type": "uint256"
+        }
       ],
-      name: "viewBalanceByAddress",
-      outputs: [
-        {
-          internalType: "uint256",
-          name: "balance",
-          type: "uint256",
-        },
-      ],
-      stateMutability: "view",
-      type: "function",
+      "stateMutability": "view",
+      "type": "function"
     },
     {
-      inputs: [
+      "inputs": [
         {
-          internalType: "uint256",
-          name: "employeeId",
-          type: "uint256",
-        },
+          "internalType": "address",
+          "name": "newOwner",
+          "type": "address"
+        }
       ],
-      name: "viewBalanceById",
-      outputs: [
-        {
-          internalType: "uint256",
-          name: "balance",
-          type: "uint256",
-        },
-      ],
-      stateMutability: "view",
-      type: "function",
+      "name": "transferOwnership",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
     },
     {
-      inputs: [],
-      name: "withdrawSalary",
-      outputs: [],
-      stateMutability: "nonpayable",
-      type: "function",
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "employeeId",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "newSalary",
+          "type": "uint256"
+        }
+      ],
+      "name": "updateSalary",
+      "outputs": [],
+      "stateMutability": "payable",
+      "type": "function"
     },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "employeeAddress",
+          "type": "address"
+        }
+      ],
+      "name": "viewBalance",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "balance",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "withdrawSalary",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "employeeAddress",
+          "type": "address"
+        }
+      ],
+      "name": "withdrawableSalary",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "withdrawable",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    }
   ];
 
   const [companyName, setCompanyName] = useState("");
   const [totalPayrolls, setTotalPayrolls] = useState("");
+  const [totalActive, setTotalActive] = useState("");
   const [owner, setOwner] = useState("");
 
   const { data: companyNameData } = useContractRead({
     address,
     abi: abi,
     functionName: "companyName",
+    watch: true,
+  });
+
+  const { data: totalActiveEmployees } = useContractRead({
+    address,
+    abi: abi,
+    functionName: "getActiveEmployees",
     watch: true,
   });
 
@@ -645,6 +692,12 @@ export default function ContractCard({ address }) {
   }, [companyNameData]);
 
   useEffect(() => {
+    if (totalActiveEmployees) {
+      setTotalActive(totalActiveEmployees.length);
+    }
+  }, [totalActiveEmployees]);
+
+  useEffect(() => {
     if (totalPayrollData) {
       setTotalPayrolls(ethers.utils.formatEther(totalPayrollData));
     }
@@ -659,15 +712,17 @@ export default function ContractCard({ address }) {
   return (
     <Card width="30%" my={2} bgColor="#0F4C75" color="#BBE1FA">
       <CardHeader>
-        <Text fontWeight="bold" align="center">
-          Company: {companyName}
+        <Text fontWeight="bold" align="center" fontSize="xl">
+          {companyName}
         </Text>
       </CardHeader>
       <CardBody>
         <Box>
           <Text>
-            <Text fontWeight="bold">Total payroll:</Text>
-            <Text>{totalPayrolls} ETH</Text>
+            <Text fontWeight="bold">Active Employees: {totalActive}</Text>
+          </Text>
+          <Text>
+            <Text fontWeight="bold">Total payrolls: {totalPayrolls} ETH</Text>
           </Text>
         </Box>
       </CardBody>
@@ -693,12 +748,16 @@ export default function ContractCard({ address }) {
           </Text>
         </Box>
       </CardFooter>
-      <Flex width='100%' justify='space-evenly' mb={3}>
-        <Link as={NextLink} href={`/manage/${address}`} width='40%'>
-          <Button width="100%" colorScheme="red">Employer Dashboard</Button>
+      <Flex width="100%" justify="space-evenly" mb={3}>
+        <Link as={NextLink} href={`/manage/${address}`} width="40%">
+          <Button width="100%" colorScheme="red">
+            Employer Dashboard
+          </Button>
         </Link>
-        <Link as={NextLink} href={`/withdraw/${address}`} width='40%'>
-          <Button width='100%' colorScheme="green">Employee Access</Button>
+        <Link as={NextLink} href={`/access/${address}`} width="40%">
+          <Button width="100%" colorScheme="green">
+            Employee Access
+          </Button>
         </Link>
       </Flex>
     </Card>

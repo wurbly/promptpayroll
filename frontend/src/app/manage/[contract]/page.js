@@ -1,7 +1,17 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Flex, Box, Heading, Text, Tabs, TabList, Tab, TabPanels, TabPanel } from "@chakra-ui/react";
+import {
+  Flex,
+  Box,
+  Heading,
+  Text,
+  Tabs,
+  TabList,
+  Tab,
+  TabPanels,
+  TabPanel,
+} from "@chakra-ui/react";
 import { useAccount, useContractRead } from "wagmi";
 import NameChange from "./components/NameChange";
 import DepositSalary from "./components/DepositSalary";
@@ -18,7 +28,7 @@ export default function Employer({ params }) {
       inputs: [
         {
           internalType: "string",
-          name: "_companyName",
+          name: "newCompanyName",
           type: "string",
         },
         {
@@ -424,6 +434,19 @@ export default function Employer({ params }) {
       type: "function",
     },
     {
+      inputs: [],
+      name: "getActiveEmployees",
+      outputs: [
+        {
+          internalType: "address payable[]",
+          name: "activeEmployees",
+          type: "address[]",
+        },
+      ],
+      stateMutability: "view",
+      type: "function",
+    },
+    {
       inputs: [
         {
           internalType: "address",
@@ -435,8 +458,21 @@ export default function Employer({ params }) {
       outputs: [
         {
           internalType: "uint256",
-          name: "_id",
+          name: "id",
           type: "uint256",
+        },
+      ],
+      stateMutability: "view",
+      type: "function",
+    },
+    {
+      inputs: [],
+      name: "getEmployees",
+      outputs: [
+        {
+          internalType: "address payable[]",
+          name: "allEmployees",
+          type: "address[]",
         },
       ],
       stateMutability: "view",
@@ -522,6 +558,19 @@ export default function Employer({ params }) {
     },
     {
       inputs: [],
+      name: "totalBalances",
+      outputs: [
+        {
+          internalType: "uint256",
+          name: "total",
+          type: "uint256",
+        },
+      ],
+      stateMutability: "view",
+      type: "function",
+    },
+    {
+      inputs: [],
       name: "totalSalaries",
       outputs: [
         {
@@ -561,7 +610,7 @@ export default function Employer({ params }) {
       ],
       name: "updateSalary",
       outputs: [],
-      stateMutability: "nonpayable",
+      stateMutability: "payable",
       type: "function",
     },
     {
@@ -572,26 +621,7 @@ export default function Employer({ params }) {
           type: "address",
         },
       ],
-      name: "viewBalanceByAddress",
-      outputs: [
-        {
-          internalType: "uint256",
-          name: "balance",
-          type: "uint256",
-        },
-      ],
-      stateMutability: "view",
-      type: "function",
-    },
-    {
-      inputs: [
-        {
-          internalType: "uint256",
-          name: "employeeId",
-          type: "uint256",
-        },
-      ],
-      name: "viewBalanceById",
+      name: "viewBalance",
       outputs: [
         {
           internalType: "uint256",
@@ -607,6 +637,25 @@ export default function Employer({ params }) {
       name: "withdrawSalary",
       outputs: [],
       stateMutability: "nonpayable",
+      type: "function",
+    },
+    {
+      inputs: [
+        {
+          internalType: "address",
+          name: "employeeAddress",
+          type: "address",
+        },
+      ],
+      name: "withdrawableSalary",
+      outputs: [
+        {
+          internalType: "uint256",
+          name: "withdrawable",
+          type: "uint256",
+        },
+      ],
+      stateMutability: "view",
       type: "function",
     },
   ];
@@ -669,18 +718,18 @@ export default function Employer({ params }) {
       <Box width="80%" bgColor="#0F4C75" align="center" p={3} mb={3}>
         <Text textAlign={"center"}>{walletConnectStatus}</Text>
       </Box>
-      <Tabs width='80%' align="center" variant="enclosed">
+      <Tabs width="80%" align="center" variant="enclosed">
         <TabList>
           <Tab>Deposit Salaries</Tab>
           <Tab>Change Company Name</Tab>
           <Tab>Add Employee</Tab>
           <Tab>Get Employee Id</Tab>
-          <Tab>Deactivate Employee</Tab>
           <Tab>Update Employee Salary</Tab>
-          <Tab>Terminate Employee</Tab>  
+          <Tab>Deactivate Employee</Tab>
+          <Tab>Terminate Employee</Tab>
           <Tab>Close Company</Tab>
         </TabList>
-          
+
         <TabPanels>
           <TabPanel px={0}>
             <DepositSalary contractAddress={contractAddress} abi={abi} />
@@ -695,10 +744,10 @@ export default function Employer({ params }) {
             <GetEmployeeId contractAddress={contractAddress} abi={abi} />
           </TabPanel>
           <TabPanel px={0}>
-            <DeactivateEmployee contractAddress={contractAddress} abi={abi} />
+            <UpdateSalary contractAddress={contractAddress} abi={abi} />
           </TabPanel>
           <TabPanel px={0}>
-            <UpdateSalary contractAddress={contractAddress} abi={abi} />
+            <DeactivateEmployee contractAddress={contractAddress} abi={abi} />
           </TabPanel>
           <TabPanel px={0}>
             <TerminateEmployee contractAddress={contractAddress} abi={abi} />

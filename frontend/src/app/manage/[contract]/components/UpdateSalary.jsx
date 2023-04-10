@@ -11,24 +11,50 @@ import {
   InputRightAddon,
   FormHelperText,
   Button,
-  Spinner
+  Spinner,
 } from "@chakra-ui/react";
 import { ethers } from "ethers";
-import { useContractWrite, usePrepareContractWrite } from "wagmi";
+import {
+  useContractRead,
+  useContractWrite,
+  usePrepareContractWrite,
+} from "wagmi";
 import FormHeading from "./FormHeading";
 
 export default function UpdateSalary({ contractAddress, abi }) {
   const [employeeId, setEmployeeId] = useState("");
+  const [currentSalary, setCurrentSalary] = useState("");
+  const [currentSalaryInWei, setCurrentSalaryInWei] = useState("");
   const [newSalary, setNewSalary] = useState(0);
   const [salaryInWei, setSalaryInWei] = useState("");
+  const [txValue, setTxValue] = useState("");
   const [txHash, setTxHash] = useState("");
   const [statusMessage, setStatusMessage] = useState("");
+
+  const { data: employeeAddressData } = useContractRead({
+    address: contractAddress,
+    abi: abi,
+    functionName: "employeeAddresses",
+    args: [employeeId],
+    watch: true,
+  });
+
+  const { data: currentEmployeeData } = useContractRead({
+    address: contractAddress,
+    abi: abi,
+    functionName: "employees",
+    args: [employeeAddressData],
+    watch: true,
+  });
 
   const { config } = usePrepareContractWrite({
     address: contractAddress,
     abi: abi,
     functionName: "updateSalary",
     args: [employeeId, salaryInWei],
+    overrides: {
+      value: txValue,
+    },
   });
 
   const {
@@ -61,10 +87,34 @@ export default function UpdateSalary({ contractAddress, abi }) {
   }, [data]);
 
   useEffect(() => {
+    if (employeeAddressData) {
+      setCurrentSalary(
+        String(ethers.utils.formatEther(currentEmployeeData[2]))
+      );
+    }
+  }, [employeeId]);
+
+  useEffect(() => {
+    if (currentSalary) {
+      setCurrentSalaryInWei(ethers.utils.parseEther(currentSalary));
+    }
+  }, [currentSalary]);
+
+  useEffect(() => {
     if (newSalary) {
       setSalaryInWei(ethers.utils.parseEther(newSalary));
     }
   }, [newSalary]);
+
+  useEffect(() => {
+    if (salaryInWei) {
+      if (salaryInWei - currentSalaryInWei > 0) {
+        setTxValue((salaryInWei - currentSalaryInWei).toString());
+      } else {
+        setTxValue(0);
+      }
+    }
+  }, [salaryInWei]);
 
   const handleChangeEmployeeId = (evt) => {
     setEmployeeId(evt.target.value);
@@ -77,14 +127,20 @@ export default function UpdateSalary({ contractAddress, abi }) {
   const handleSubmit = (evt) => {
     evt.preventDefault();
     write();
-    setEmployeeAddress("");
-    setEmployeeSalary(0);
+    setEmployeeId("");
+    setCurrentSalary("");
+    setNewSalary("");
+    setCurrentSalaryInWei("");
     setSalaryInWei("");
+    setTxValue("");
   };
 
   return (
     <Flex direction="column" width="100%" bgColor="#0F4C75" p={3}>
       <FormHeading text="Update Salary" />
+      <Box align="start" border="1px solid #BBE1FA" p={1} mb={3}>
+        <Text>Current Salary: {currentSalary} ETH</Text>
+      </Box>
       <form onSubmit={handleSubmit}>
         <FormControl isRequired>
           <FormLabel>Employee ID: </FormLabel>
@@ -94,11 +150,12 @@ export default function UpdateSalary({ contractAddress, abi }) {
             onChange={handleChangeEmployeeId}
           />
           <FormHelperText color="#BBE1FA" mb={3}>
-            Please ensure you enter the correct ID. To check, use the `Get Employee Id from Address` form to confirm an employee's id!
+            Please ensure you enter the correct ID. To check, use the `Get
+            Employee Id from Address` form to confirm an employee's id!
           </FormHelperText>
         </FormControl>
         <FormControl isRequired>
-          <FormLabel>Monthly salary:</FormLabel>
+          <FormLabel>New monthly salary:</FormLabel>
           <InputGroup>
             <Input
               type="number"
@@ -108,9 +165,10 @@ export default function UpdateSalary({ contractAddress, abi }) {
             <InputRightAddon children="ETH" color="#1B262C" />
           </InputGroup>
           <FormHelperText color="#BBE1FA" mb={3}>
-            Please enter the updated salary.
-            If salary is increased, you will be required to top up the difference in salary for the current period.
-            If salary is decreased, you will be refunded the difference in salary for the current period. 
+            Please enter the updated salary. If salary is increased, you will be
+            required to top up the difference in salary for the current period.
+            If salary is decreased, you will be refunded the difference in
+            salary for the current period.
           </FormHelperText>
         </FormControl>
         <Button type="submit" colorScheme="green" mb={3} width="100%" p="auto">

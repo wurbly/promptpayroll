@@ -12,9 +12,10 @@ import {
   TabPanels,
   TabPanel,
 } from "@chakra-ui/react";
+import { ethers } from "ethers";
+import { useAccount, useContractRead } from "wagmi";
 import Withdraw from "./components/Withdraw";
 import ChangeAddress from "./components/ChangeAddress";
-import { useAccount, useContractRead } from "wagmi";
 
 export default function Employee({ params }) {
   const abi = [
@@ -22,7 +23,7 @@ export default function Employee({ params }) {
       inputs: [
         {
           internalType: "string",
-          name: "_companyName",
+          name: "newCompanyName",
           type: "string",
         },
         {
@@ -428,6 +429,19 @@ export default function Employee({ params }) {
       type: "function",
     },
     {
+      inputs: [],
+      name: "getActiveEmployees",
+      outputs: [
+        {
+          internalType: "address payable[]",
+          name: "activeEmployees",
+          type: "address[]",
+        },
+      ],
+      stateMutability: "view",
+      type: "function",
+    },
+    {
       inputs: [
         {
           internalType: "address",
@@ -439,8 +453,21 @@ export default function Employee({ params }) {
       outputs: [
         {
           internalType: "uint256",
-          name: "_id",
+          name: "id",
           type: "uint256",
+        },
+      ],
+      stateMutability: "view",
+      type: "function",
+    },
+    {
+      inputs: [],
+      name: "getEmployees",
+      outputs: [
+        {
+          internalType: "address payable[]",
+          name: "allEmployees",
+          type: "address[]",
         },
       ],
       stateMutability: "view",
@@ -526,6 +553,19 @@ export default function Employee({ params }) {
     },
     {
       inputs: [],
+      name: "totalBalances",
+      outputs: [
+        {
+          internalType: "uint256",
+          name: "total",
+          type: "uint256",
+        },
+      ],
+      stateMutability: "view",
+      type: "function",
+    },
+    {
+      inputs: [],
       name: "totalSalaries",
       outputs: [
         {
@@ -565,7 +605,7 @@ export default function Employee({ params }) {
       ],
       name: "updateSalary",
       outputs: [],
-      stateMutability: "nonpayable",
+      stateMutability: "payable",
       type: "function",
     },
     {
@@ -576,26 +616,7 @@ export default function Employee({ params }) {
           type: "address",
         },
       ],
-      name: "viewBalanceByAddress",
-      outputs: [
-        {
-          internalType: "uint256",
-          name: "balance",
-          type: "uint256",
-        },
-      ],
-      stateMutability: "view",
-      type: "function",
-    },
-    {
-      inputs: [
-        {
-          internalType: "uint256",
-          name: "employeeId",
-          type: "uint256",
-        },
-      ],
-      name: "viewBalanceById",
+      name: "viewBalance",
       outputs: [
         {
           internalType: "uint256",
@@ -613,10 +634,35 @@ export default function Employee({ params }) {
       stateMutability: "nonpayable",
       type: "function",
     },
+    {
+      inputs: [
+        {
+          internalType: "address",
+          name: "employeeAddress",
+          type: "address",
+        },
+      ],
+      name: "withdrawableSalary",
+      outputs: [
+        {
+          internalType: "uint256",
+          name: "withdrawable",
+          type: "uint256",
+        },
+      ],
+      stateMutability: "view",
+      type: "function",
+    },
   ];
+
+  const contractAddress = params.contract;
   const [walletConnectStatus, setWalletConnectStatus] = useState("");
-  const [contractAddress, setContract] = useState(params.contract);
   const [companyName, setCompanyName] = useState("");
+  const [withdrawableBalance, setWithdrawableBalance] = useState("");
+  const [monthBalance, setMonthBalance] = useState("");
+
+  const { address, isConnecting, isConnected, isDisconnected, status } =
+    useAccount();
 
   const { data: companyNameData } = useContractRead({
     address: contractAddress,
@@ -625,8 +671,21 @@ export default function Employee({ params }) {
     watch: true,
   });
 
-  const { address, isConnecting, isConnected, isDisconnected, status } =
-    useAccount();
+  const { data: withdrawableBalanceData } = useContractRead({
+    address: contractAddress,
+    abi: abi,
+    functionName: "withdrawableSalary",
+    args: [address],
+    watch: true,
+  });
+
+  const { data: monthBalanceData } = useContractRead({
+    address: contractAddress,
+    abi: abi,
+    functionName: "viewBalance",
+    args: [address],
+    watch: true,
+  });
 
   useEffect(() => {
     if (isDisconnected) {
@@ -645,6 +704,18 @@ export default function Employee({ params }) {
       setCompanyName(companyNameData);
     }
   }, [companyNameData]);
+
+  useEffect(() => {
+    if (withdrawableBalanceData) {
+      setWithdrawableBalance(ethers.utils.formatEther(withdrawableBalanceData));
+    }
+  }, [address]);
+
+  useEffect(() => {
+    if (monthBalanceData) {
+      setMonthBalance(ethers.utils.formatEther(monthBalanceData));
+    }
+  }, [address]);
 
   return (
     <Flex direction="column" align="center">
@@ -674,11 +745,24 @@ export default function Employee({ params }) {
       <Box width="80%" bgColor="#0F4C75" align="center" p={3} mb={3}>
         <Text textAlign={"center"}>{walletConnectStatus}</Text>
       </Box>
-      <Tabs width='80%' align="center" variant="enclosed">
+      <Flex direction="row" width="80%" justify="space-evenly" mb={3}>
+        <Box width="45%">
+          <Text>
+            <Text>Your withdrawable balance is: </Text>
+            <Text fontWeight="bold">{withdrawableBalance} ETH.</Text>
+          </Text>
+        </Box>
+        <Box width="45%">
+          <Text>
+            <Text>Your remaining balance for the month is: </Text>
+            <Text fontWeight="bold">{monthBalance} ETH.</Text>
+          </Text>
+        </Box>
+      </Flex>
+      <Tabs width="80%" align="center" variant="enclosed">
         <TabList>
           <Tab>Withdraw</Tab>
           <Tab>Change Address</Tab>
-          <Tab>View Balance</Tab>
         </TabList>
 
         <TabPanels>
@@ -687,9 +771,6 @@ export default function Employee({ params }) {
           </TabPanel>
           <TabPanel px={0}>
             <ChangeAddress contractAddress={contractAddress} abi={abi} />
-          </TabPanel>
-          <TabPanel px={0}>
-            
           </TabPanel>
         </TabPanels>
       </Tabs>

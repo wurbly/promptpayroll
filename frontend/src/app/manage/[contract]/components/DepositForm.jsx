@@ -60,14 +60,14 @@ export default function DepositForm({ contractAddress, abi, salaries }) {
 
   useEffect(() => {
     if (salaries) {
-      setSalaryPayable(ethers.utils.parseEther(salaries).toHexString());
+      setSalaryPayable(ethers.utils.parseEther(salaries).toString());
     }
   }, [salaries]);
 
   const handleChange = (evt) => {
     setMonthDays(evt.target.value);
-  }
-  
+  };
+
   const handleSubmit = (evt) => {
     evt.preventDefault();
     write();
@@ -81,8 +81,8 @@ export default function DepositForm({ contractAddress, abi, salaries }) {
           <FormLabel mt={3}>Days this Month</FormLabel>
           <Input type="text" value={monthDays} onChange={handleChange} />
           <FormHelperText color="#BBE1FA" mb={3}>
-            Confirm that the total salaries are correkt.
-            Once deposited, you will not be able to withdraw unless you close the Company.
+            Confirm that the total salaries are correkt. Once deposited, you
+            will not be able to withdraw unless you close the Company.
           </FormHelperText>
         </FormControl>
         <Button type="submit" colorScheme="green" width="100%">
