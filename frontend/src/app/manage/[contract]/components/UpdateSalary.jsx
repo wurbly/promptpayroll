@@ -151,7 +151,7 @@ export default function UpdateSalary({ contractAddress, abi }) {
           />
           <FormHelperText color="#BBE1FA" mb={3}>
             Please ensure you enter the correct ID. To check, use the `Get
-            Employee Id from Address` form to confirm an employee's id!
+            Employee Id from Address` form to confirm an employee&apos;s id!
           </FormHelperText>
         </FormControl>
         <FormControl isRequired>
@@ -162,7 +162,7 @@ export default function UpdateSalary({ contractAddress, abi }) {
               value={newSalary}
               onChange={handleChangeSalary}
             />
-            <InputRightAddon children="ETH" color="#1B262C" />
+            <InputRightAddon color="#1B262C">ETH</InputRightAddon>
           </InputGroup>
           <FormHelperText color="#BBE1FA" mb={3}>
             Please enter the updated salary. If salary is increased, you will be

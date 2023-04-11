@@ -71,7 +71,7 @@ export default function TerminateEmployee({ contractAddress, abi }){
       <Box mb={3}>
         <Text mb={3}>This terminates the employee with the `EmployeeId`.</Text>
         <Text mb={3}>Any accrued salaries this month will be automatically paid to the employee and any excess salaries deposited will be refunded to your account.</Text>
-        <Text>If you've made an incorrect entry and haven't deposited any salaries, please use the "Deactivate Employee" option instead.</Text>
+        <Text>If you&apos;ve made an incorrect entry and haven&apos;t deposited any salaries, please use the `Deactivate Employee` option instead.</Text>
       </Box>
       <form onSubmit={handleSubmit}>
         <FormControl isRequired>

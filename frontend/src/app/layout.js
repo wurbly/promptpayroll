@@ -1,6 +1,5 @@
 'use client';
 
-import './globals.css';
 import React from 'react';
 import { CacheProvider } from '@chakra-ui/next-js';
 import { ChakraProvider, Box } from '@chakra-ui/react';
@@ -22,6 +21,7 @@ export const metadata = {
 }
 
 export default function RootLayout({ children }) {
+
   const { chains, provider } = configureChains(
     [mainnet, goerli, sepolia],
     [
@@ -31,7 +31,7 @@ export default function RootLayout({ children }) {
   );
   
   const { connectors } = getDefaultWallets({
-    appName: 'My RainbowKit App',
+    appName: 'PromptPayroll',
     chains
   });
   
@@ -62,5 +62,5 @@ export default function RootLayout({ children }) {
         </CacheProvider>
       </body>
     </html>
-  )
+  );
 }

@@ -107,7 +107,7 @@ export default function AddEmployee({ contractAddress, abi }) {
               value={employeeSalary}
               onChange={handleChangeSalary}
             />
-            <InputRightAddon children="ETH" color="#1B262C" />
+            <InputRightAddon color="#1B262C">ETH</InputRightAddon>
           </InputGroup>
           <FormHelperText color="#BBE1FA" mb={3}>
             Please enter the correct salary in ETH. Changing the salary later
