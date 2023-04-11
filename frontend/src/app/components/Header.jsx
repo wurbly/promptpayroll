@@ -1,7 +1,9 @@
-import { Flex } from '@chakra-ui/react'
-import { ConnectButton } from '@rainbow-me/rainbowkit';
-import Brand from './Brand';
-import Links from './Links';
+"use client";
+
+import { Flex } from "@chakra-ui/react";
+import { ConnectButton } from "@rainbow-me/rainbowkit";
+import Brand from "./Brand";
+import Links from "./Links";
 
 export default function Header() {
   return (
@@ -14,12 +16,7 @@ export default function Header() {
       p={3}
       mb={10}
     >
-      <Flex 
-        width="100%"
-        align="center" 
-        justify="space-between"
-        p={5}
-      >
+      <Flex width="100%" align="center" justify="space-between" p={5}>
         <Brand />
         <ConnectButton />
       </Flex>

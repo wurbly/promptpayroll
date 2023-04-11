@@ -1,13 +1,14 @@
-import { Flex, Box, Text } from '@chakra-ui/react';
-import Links from './Links';
+"use client";
+
+import { Flex, Box, Text } from "@chakra-ui/react";
+import Links from "./Links";
 
 export default function Header() {
-
   return (
-    <Flex 
+    <Flex
       direction="column"
       align="center"
-      justify="center" 
+      justify="center"
       bgColor="#3282B8"
       p={3}
       mt={10}
@@ -16,7 +17,7 @@ export default function Header() {
         <Text>😶 wurbs was here 😶</Text>
       </Box>
       <Box py={3}>
-        <Links /> 
+        <Links />
       </Box>
     </Flex>
   );
